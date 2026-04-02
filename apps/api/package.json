@@ -1,0 +1,20 @@
+{
+  "name": "@blue/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "@blue-labs/document-processor": "latest",
+    "@blue-labs/language": "latest",
+    "@blue-repository/types": "latest",
+    "pg-boss": "^10.1.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  }
+}
