@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { emptyState, newItemButton, pageHeader, pageTitle } from "@/lib/styles";
 
 export default async function DocumentsPage() {
   const session = await auth();
@@ -7,47 +8,16 @@ export default async function DocumentsPage() {
 
   return (
     <div>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Blue Documents</h2>
-        <a href="/documents/new" style={styles.newButton}>
+      <div style={pageHeader}>
+        <h2 style={pageTitle}>Blue Documents</h2>
+        <a href="/documents/new" style={newItemButton}>
           + New Document
         </a>
       </div>
 
-      <p style={styles.empty}>
+      <p style={emptyState}>
         No documents yet. Create one to start a Document Session.
       </p>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  header: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: "2rem",
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.5rem",
-    fontWeight: 700,
-  },
-  newButton: {
-    padding: "0.5rem 1.25rem",
-    background: "#2563eb",
-    color: "#fff",
-    borderRadius: 8,
-    textDecoration: "none",
-    fontWeight: 600,
-    fontSize: "0.9rem",
-  },
-  empty: {
-    color: "#6b7280",
-    textAlign: "center",
-    padding: "3rem 0",
-    border: "1px dashed #e5e7eb",
-    borderRadius: 10,
-    background: "#fff",
-  },
-};

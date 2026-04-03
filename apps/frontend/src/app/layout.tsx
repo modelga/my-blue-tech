@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { auth, signOut } from "@/auth";
+import { colors, radius } from "@/lib/styles";
+import type { CSSProperties } from "react";
 
 export const metadata: Metadata = {
   title: "Blue Technologies",
@@ -55,13 +57,13 @@ export default async function RootLayout({
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, CSSProperties> = {
   body: {
     fontFamily: "system-ui, -apple-system, sans-serif",
     margin: 0,
     padding: 0,
-    background: "#f9fafb",
-    color: "#111",
+    background: colors.pageBg,
+    color: colors.text,
   },
   header: {
     display: "flex",
@@ -69,13 +71,13 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     padding: "0 2rem",
     height: 56,
-    background: "#fff",
-    borderBottom: "1px solid #e5e7eb",
+    background: colors.white,
+    borderBottom: `1px solid ${colors.border}`,
   },
   brand: {
     fontWeight: 700,
     fontSize: "1rem",
-    color: "#111",
+    color: colors.text,
     textDecoration: "none",
   },
   nav: {
@@ -85,30 +87,30 @@ const styles: Record<string, React.CSSProperties> = {
   },
   userLabel: {
     fontSize: "0.875rem",
-    color: "#6b7280",
+    color: colors.textMuted,
   },
   navLink: {
     fontSize: "0.875rem",
-    color: "#374151",
+    color: colors.textBody,
     textDecoration: "none",
     fontWeight: 500,
   },
   navLinkPrimary: {
     fontSize: "0.875rem",
-    color: "#fff",
-    background: "#2563eb",
+    color: colors.white,
+    background: colors.blue,
     padding: "0.375rem 0.875rem",
-    borderRadius: 6,
+    borderRadius: radius.sm,
     textDecoration: "none",
     fontWeight: 500,
   },
   signOutButton: {
     fontSize: "0.875rem",
-    color: "#374151",
+    color: colors.textBody,
     background: "none",
-    border: "1px solid #e5e7eb",
+    border: `1px solid ${colors.border}`,
     padding: "0.375rem 0.875rem",
-    borderRadius: 6,
+    borderRadius: radius.sm,
     cursor: "pointer",
     fontWeight: 500,
   },

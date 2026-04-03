@@ -2,7 +2,24 @@
 
 import { dump as dumpYaml, load as parseYaml } from "js-yaml";
 import { useRouter } from "next/navigation";
+import type { CSSProperties } from "react";
 import { useState } from "react";
+import {
+  cancelButton,
+  colors,
+  errorBanner,
+  fieldError,
+  formActions,
+  formBack,
+  formCard,
+  formInput,
+  formLabel,
+  formPageHeader,
+  monoTextarea,
+  pageTitle,
+  radius,
+  submitButton,
+} from "@/lib/styles";
 
 type Format = "json" | "yaml";
 
@@ -88,17 +105,17 @@ export default function NewDocumentPage() {
 
   return (
     <div>
-      <div style={styles.header}>
-        <a href="/documents" style={styles.back}>
+      <div style={formPageHeader}>
+        <a href="/documents" style={formBack}>
           ← Documents
         </a>
-        <h2 style={styles.title}>New Blue Document</h2>
+        <h2 style={pageTitle}>New Blue Document</h2>
       </div>
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        {error && <p style={styles.errorBanner}>{error}</p>}
+      <form onSubmit={handleSubmit} style={formCard}>
+        {error && <p style={errorBanner}>{error}</p>}
 
-        <label style={styles.label}>
+        <label style={formLabel}>
           Name
           <input
             type="text"
@@ -106,11 +123,11 @@ export default function NewDocumentPage() {
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. My First Document"
             required
-            style={styles.input}
+            style={formInput}
           />
         </label>
 
-        <div style={styles.label}>
+        <div style={formLabel}>
           <div style={styles.payloadHeader}>
             <span>Document payload</span>
             <div style={styles.formatToggle}>
@@ -135,24 +152,22 @@ export default function NewDocumentPage() {
             rows={16}
             spellCheck={false}
             style={{
-              ...styles.textarea,
-              borderColor: payloadError ? "#fca5a5" : "#e5e7eb",
+              ...monoTextarea,
+              borderColor: payloadError ? "#fca5a5" : colors.border,
             }}
           />
-          {payloadError && (
-            <span style={styles.fieldError}>{payloadError}</span>
-          )}
+          {payloadError && <span style={fieldError}>{payloadError}</span>}
         </div>
 
-        <div style={styles.actions}>
-          <a href="/documents" style={styles.cancelButton}>
+        <div style={formActions}>
+          <a href="/documents" style={cancelButton}>
             Cancel
           </a>
           <button
             type="submit"
             disabled={pending || !!payloadError}
             style={{
-              ...styles.submitButton,
+              ...submitButton,
               opacity: pending || !!payloadError ? 0.6 : 1,
             }}
           >
@@ -164,55 +179,7 @@ export default function NewDocumentPage() {
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  header: {
-    marginBottom: "1.75rem",
-  },
-  back: {
-    fontSize: "0.875rem",
-    color: "#6b7280",
-    textDecoration: "none",
-    display: "inline-block",
-    marginBottom: "0.5rem",
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.5rem",
-    fontWeight: 700,
-  },
-  form: {
-    background: "#fff",
-    border: "1px solid #e5e7eb",
-    borderRadius: 10,
-    padding: "2rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "1.25rem",
-  },
-  errorBanner: {
-    background: "#fef2f2",
-    border: "1px solid #fecaca",
-    color: "#dc2626",
-    borderRadius: 6,
-    padding: "0.75rem 1rem",
-    margin: 0,
-    fontSize: "0.875rem",
-  },
-  label: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.375rem",
-    fontSize: "0.9rem",
-    fontWeight: 500,
-    color: "#374151",
-  },
-  input: {
-    padding: "0.625rem 0.75rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: 6,
-    fontSize: "0.95rem",
-    fontFamily: "inherit",
-  },
+const styles: Record<string, CSSProperties> = {
   payloadHeader: {
     display: "flex",
     alignItems: "center",
@@ -220,63 +187,23 @@ const styles: Record<string, React.CSSProperties> = {
   },
   formatToggle: {
     display: "flex",
-    border: "1px solid #e5e7eb",
-    borderRadius: 6,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.sm,
     overflow: "hidden",
   },
   formatButton: {
     padding: "0.2rem 0.75rem",
-    background: "#fff",
-    color: "#6b7280",
+    background: colors.white,
+    color: colors.textMuted,
     border: "none",
-    borderRight: "1px solid #e5e7eb",
+    borderRight: `1px solid ${colors.border}`,
     fontSize: "0.75rem",
     fontWeight: 600,
     cursor: "pointer",
     letterSpacing: "0.05em",
   },
   formatButtonActive: {
-    background: "#2563eb",
-    color: "#fff",
-  },
-  textarea: {
-    padding: "0.75rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: 6,
-    fontSize: "0.85rem",
-    fontFamily: "ui-monospace, SFMono-Regular, monospace",
-    resize: "vertical",
-    lineHeight: 1.5,
-  },
-  fieldError: {
-    fontSize: "0.8rem",
-    color: "#dc2626",
-  },
-  actions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "0.75rem",
-    paddingTop: "0.5rem",
-  },
-  cancelButton: {
-    padding: "0.625rem 1.25rem",
-    background: "#fff",
-    color: "#374151",
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    textDecoration: "none",
-    fontWeight: 500,
-    fontSize: "0.9rem",
-    cursor: "pointer",
-  },
-  submitButton: {
-    padding: "0.625rem 1.5rem",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontWeight: 600,
-    fontSize: "0.9rem",
-    cursor: "pointer",
+    background: colors.blue,
+    color: colors.white,
   },
 };

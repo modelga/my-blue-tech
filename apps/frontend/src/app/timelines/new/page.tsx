@@ -1,156 +1,98 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
+"use client";
 
-export default async function NewTimelinePage() {
-  const session = await auth();
-  if (!session) redirect("/signin");
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  cancelButton,
+  errorBanner,
+  formActions,
+  formBack,
+  formCard,
+  formInput,
+  formLabel,
+  formPageHeader,
+  formTextarea,
+  pageTitle,
+  submitButton,
+} from "@/lib/styles";
 
-  async function createTimeline(formData: FormData) {
-    "use server";
+export default function NewTimelinePage() {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
-    const name = (formData.get("name") as string | null)?.trim();
-    const description = (formData.get("description") as string | null)?.trim();
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
 
-    if (!name) return;
+    const fd = new FormData(e.currentTarget);
+    const name = (fd.get("name") as string).trim();
+    const description = (fd.get("description") as string).trim();
 
     const id = crypto.randomUUID();
 
-    const res = await fetch(`/api/timelines`, {
+    const res = await fetch("/api/timelines", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id,
-        name,
-        description: description || undefined,
-      }),
+      body: JSON.stringify({ id, name, description: description || undefined }),
     });
 
-    if (!res.ok) {
-      // TODO: surface error to user once error handling is added
-      console.error("[timelines] create failed", await res.text());
-      return;
+    if (res.ok) {
+      router.push("/timelines");
+    } else {
+      const body = await res.json().catch(() => ({}));
+      setError(body.error ?? "Failed to create timeline.");
+      setPending(false);
     }
-
-    redirect("/timelines");
   }
 
   return (
     <div>
-      <div style={styles.header}>
-        <a href="/timelines" style={styles.back}>
+      <div style={formPageHeader}>
+        <a href="/timelines" style={formBack}>
           ← Timelines
         </a>
-        <h2 style={styles.title}>New Timeline</h2>
+        <h2 style={pageTitle}>New Timeline</h2>
       </div>
 
-      <form action={createTimeline} style={styles.form}>
-        <label style={styles.label}>
+      <form onSubmit={handleSubmit} style={formCard}>
+        {error && <p style={errorBanner}>{error}</p>}
+
+        <label style={formLabel}>
           Name
           <input
             name="name"
             type="text"
             placeholder="e.g. Product Launch Events"
             required
-            style={styles.input}
+            style={formInput}
           />
         </label>
 
-        <label style={styles.label}>
+        <label style={formLabel}>
           Description
           <textarea
             name="description"
             placeholder="Optional description…"
             rows={4}
-            style={styles.textarea}
+            style={formTextarea}
           />
         </label>
 
-        <div style={styles.actions}>
-          <a href="/timelines" style={styles.cancelButton}>
+        <div style={formActions}>
+          <a href="/timelines" style={cancelButton}>
             Cancel
           </a>
-          <button type="submit" style={styles.submitButton}>
-            Create Timeline
+          <button
+            type="submit"
+            disabled={pending}
+            style={{ ...submitButton, opacity: pending ? 0.7 : 1 }}
+          >
+            {pending ? "Creating…" : "Create Timeline"}
           </button>
         </div>
       </form>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  header: {
-    marginBottom: "1.75rem",
-  },
-  back: {
-    fontSize: "0.875rem",
-    color: "#6b7280",
-    textDecoration: "none",
-    display: "inline-block",
-    marginBottom: "0.5rem",
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.5rem",
-    fontWeight: 700,
-  },
-  form: {
-    background: "#fff",
-    border: "1px solid #e5e7eb",
-    borderRadius: 10,
-    padding: "2rem",
-    display: "flex",
-    flexDirection: "column",
-    gap: "1.25rem",
-  },
-  label: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "0.375rem",
-    fontSize: "0.9rem",
-    fontWeight: 500,
-    color: "#374151",
-  },
-  input: {
-    padding: "0.625rem 0.75rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: 6,
-    fontSize: "0.95rem",
-    fontFamily: "inherit",
-  },
-  textarea: {
-    padding: "0.625rem 0.75rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: 6,
-    fontSize: "0.95rem",
-    fontFamily: "inherit",
-    resize: "vertical",
-    lineHeight: 1.5,
-  },
-  actions: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: "0.75rem",
-    paddingTop: "0.5rem",
-  },
-  cancelButton: {
-    padding: "0.625rem 1.25rem",
-    background: "#fff",
-    color: "#374151",
-    border: "1px solid #e5e7eb",
-    borderRadius: 8,
-    textDecoration: "none",
-    fontWeight: 500,
-    fontSize: "0.9rem",
-  },
-  submitButton: {
-    padding: "0.625rem 1.5rem",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontWeight: 600,
-    fontSize: "0.9rem",
-    cursor: "pointer",
-  },
-};

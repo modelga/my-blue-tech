@@ -172,3 +172,33 @@ Stworzenie minimalnej usługi webowej (MyOS-like service) oraz lekkiego dashboar
 W przypadku niejasności, nie zakładaj rozwiązań – zadawaj pytania lub zostawiaj komentarze w kodzie.
 
 ---
+
+## Frontend — wspólna biblioteka stylów
+
+Wszystkie style inline w aplikacji frontendowej (`apps/frontend`) są scentralizowane w:
+
+```
+apps/frontend/src/lib/styles.ts
+```
+
+### Struktura pliku
+
+| Export | Przeznaczenie |
+|---|---|
+| `colors` | Design tokens — kolory (blue, white, border, error, itp.) |
+| `radius` | Design tokens — border-radius (sm=6, md=8, lg=10, xl=12) |
+| `authWrapper`, `authCard`, `authTitle`, `authSubtitle`, `authInput`, `authPrimaryButton`, `authDividerText`, `authLink` | Strony logowania i rejestracji |
+| `pageHeader`, `pageTitle`, `newItemButton`, `emptyState` | Nagłówki stron listingowych + przycisk "New X" + pusty stan |
+| `formPageHeader`, `formBack`, `formCard`, `formLabel`, `formInput`, `formTextarea`, `monoTextarea`, `formActions`, `cancelButton`, `submitButton` | Formularze tworzenia/edycji |
+| `errorBanner`, `fieldError` | Komunikaty błędów |
+| `dashGrid`, `dashCard`, `dashCardTitle`, `dashCardBody` | Siatka kart na dashboardzie |
+| `heroSection`, `heroTitle`, `heroSubtitle`, `heroActions`, `heroPrimaryButton`, `heroSecondaryButton` | Sekcja hero dla niezalogowanych |
+
+### Zasady dla agentów
+
+- **Nie twórz lokalnych obiektów `styles` w nowych komponentach.** Najpierw sprawdź, czy potrzebne style już istnieją w `@/lib/styles`.
+- Jeśli nowy komponent wymaga stylu, który nie istnieje w bibliotece, **dodaj go do `styles.ts`** zamiast definiować lokalnie.
+- Używaj tokenów (`colors.blue`, `radius.md`) zamiast wpisywać wartości na twardo (`"#2563eb"`, `8`).
+- Styl specyficzny dla jednego komponentu (np. format toggle w edytorze JSON/YAML) może pozostać lokalny, ale powinien korzystać z tokenów.
+
+---

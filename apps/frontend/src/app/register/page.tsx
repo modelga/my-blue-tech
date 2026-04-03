@@ -2,6 +2,17 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  authCard,
+  authDividerText,
+  authInput,
+  authLink,
+  authPrimaryButton,
+  authSubtitle,
+  authTitle,
+  authWrapper,
+  errorBanner,
+} from "@/lib/styles";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -40,12 +51,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Create an account</h1>
-        <p style={styles.subtitle}>Blue Technologies Dashboard</p>
+    <div style={authWrapper}>
+      <div style={authCard}>
+        <h1 style={authTitle}>Create an account</h1>
+        <p style={authSubtitle}>Blue Technologies Dashboard</p>
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <p style={errorBanner}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
           <input
@@ -53,7 +64,7 @@ export default function RegisterPage() {
             type="text"
             placeholder="Username"
             required
-            style={styles.input}
+            style={authInput}
           />
           <input
             name="password"
@@ -61,23 +72,27 @@ export default function RegisterPage() {
             placeholder="Password"
             required
             minLength={8}
-            style={styles.input}
+            style={authInput}
           />
           <input
             name="confirm"
             type="password"
             placeholder="Confirm password"
             required
-            style={styles.input}
+            style={authInput}
           />
-          <button type="submit" disabled={pending} style={styles.primaryButton}>
+          <button
+            type="submit"
+            disabled={pending}
+            style={{ ...authPrimaryButton, opacity: pending ? 0.7 : 1 }}
+          >
             {pending ? "Creating account…" : "Create account"}
           </button>
         </form>
 
-        <p style={styles.dividerText}>
+        <p style={authDividerText}>
           Already have an account?{" "}
-          <a href="/signin" style={styles.link}>
+          <a href="/signin" style={authLink}>
             Sign in
           </a>
         </p>
@@ -85,65 +100,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  wrapper: {
-    minHeight: "80vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  card: {
-    width: "100%",
-    maxWidth: 400,
-    padding: "2.5rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: 12,
-    boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-    background: "#fff",
-    textAlign: "center",
-  },
-  title: {
-    margin: "0 0 0.25rem",
-    fontSize: "1.5rem",
-    fontWeight: 700,
-    color: "#111",
-  },
-  subtitle: {
-    margin: "0 0 2rem",
-    color: "#6b7280",
-    fontSize: "0.95rem",
-  },
-  input: {
-    display: "block",
-    width: "100%",
-    padding: "0.625rem 0.75rem",
-    marginBottom: "0.75rem",
-    border: "1px solid #e5e7eb",
-    borderRadius: 6,
-    fontSize: "0.95rem",
-    boxSizing: "border-box",
-  },
-  primaryButton: {
-    width: "100%",
-    padding: "0.75rem 1.5rem",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    fontSize: "1rem",
-    fontWeight: 600,
-    cursor: "pointer",
-    marginBottom: "1.5rem",
-  },
-  dividerText: {
-    margin: 0,
-    color: "#6b7280",
-    fontSize: "0.875rem",
-  },
-  link: {
-    color: "#2563eb",
-    textDecoration: "none",
-    fontWeight: 500,
-  },
-};
