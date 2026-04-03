@@ -8,6 +8,7 @@
     "start": "bunx next start"
   },
   "dependencies": {
+    "js-yaml": "^4.1.1",
     "next": "^15.3.0",
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.1.0",
@@ -15,6 +16,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/js-yaml": "^4.0.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "typescript": "^5"
