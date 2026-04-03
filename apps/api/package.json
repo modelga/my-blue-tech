@@ -12,6 +12,7 @@
     "@blue-labs/language": "latest",
     "@blue-repository/types": "latest",
     "@types/pg": "^8.20.0",
+    "hono": "^4.12.10",
     "pg": "^8.20.0",
     "pg-boss": "^10.1.5"
   },

@@ -1,3 +1,5 @@
+import { Hono } from "hono";
+import { streamSSE } from "hono/streaming";
 import { Client } from "pg";
 import PgBoss from "pg-boss";
 
@@ -9,7 +11,8 @@ await boss.start();
 
 // SSE: one shared pg client listens for session notifications and fans out
 // to all active SSE response streams in-process.
-const sseClients = new Map<string, Set<ReadableStreamDefaultController>>();
+// Each entry is a write callback registered by an open SSE connection.
+const sseClients = new Map<string, Set<(data: string) => void>>();
 
 const pgListener = new Client({ connectionString: DATABASE_URL });
 await pgListener.connect();
@@ -22,131 +25,118 @@ pgListener.on("notification", (msg) => {
     seq: number;
     event: string;
   };
-  const controllers = sseClients.get(sessionId);
-  if (!controllers) return;
-  const data = `data: ${JSON.stringify({ sessionId, seq, event })}\n\n`;
-  for (const ctrl of controllers) {
-    try {
-      ctrl.enqueue(new TextEncoder().encode(data));
-    } catch {
-      controllers.delete(ctrl);
-    }
+  const writers = sseClients.get(sessionId);
+  if (!writers) return;
+  const data = JSON.stringify({ sessionId, seq, event });
+  for (const write of writers) {
+    write(data);
   }
 });
 
-Bun.serve({
-  port: PORT,
-  routes: {
-    // ── Health ──────────────────────────────────────────────────────────────
-    "/health": {
-      GET: () => Response.json({ status: "ok" }),
-    },
+const app = new Hono();
 
-    // ── Timelines ───────────────────────────────────────────────────────────
-    "/api/timelines": {
-      GET: (_req) => {
-        // TODO: list timelines for authenticated user
-        return Response.json({ timelines: [] });
-      },
-      POST: async (req) => {
-        // TODO: create timeline
-        const body = await req.json();
-        return Response.json(
-          { id: crypto.randomUUID(), ...body },
-          { status: 201 },
-        );
-      },
-    },
+// ── Health ───────────────────────────────────────────────────────────────────
+app.get("/health", (c) => c.json({ status: "ok" }));
 
-    "/api/timelines/:id": {
-      GET: (req) => {
-        // TODO: get timeline by id
-        return Response.json({ id: req.params.id });
-      },
-      PATCH: async (req) => {
-        // TODO: update timeline
-        const body = await req.json();
-        return Response.json({ id: req.params.id, ...body });
-      },
-      DELETE: (req) => {
-        // TODO: delete timeline
-        return Response.json({ deleted: req.params.id });
-      },
-    },
-
-    // ── Timeline Entries ─────────────────────────────────────────────────────
-    "/api/timelines/:id/entries": {
-      GET: (req) => {
-        // TODO: paginated entries for timeline
-        return Response.json({ timelineId: req.params.id, entries: [] });
-      },
-      POST: async (req) => {
-        // TODO: append entry + enqueue processing job atomically
-        const body = await req.json();
-        const entryId = crypto.randomUUID();
-        await boss.send("process-entry", {
-          timelineId: req.params.id,
-          entryId,
-          ...body,
-        });
-        return Response.json({ id: entryId }, { status: 201 });
-      },
-    },
-
-    // ── Document Sessions ────────────────────────────────────────────────────
-    "/api/sessions": {
-      POST: async (req) => {
-        // TODO: start a Document Session from a Blue Document
-        const body = await req.json();
-        const sessionId = crypto.randomUUID();
-        await boss.send("initialize-session", { sessionId, ...body });
-        return Response.json({ sessionId }, { status: 202 });
-      },
-    },
-    "/api/sessions/:id": {
-      GET: (req) => {
-        // TODO: get current Document Session state
-        return Response.json({ sessionId: req.params.id, state: null });
-      },
-    },
-    "/api/sessions/:id/history": {
-      GET: (req) => {
-        // TODO: get Document Session processing history
-        return Response.json({ sessionId: req.params.id, history: [] });
-      },
-    },
-
-    // ── SSE: real-time session state updates ─────────────────────────────────
-    "/api/sessions/:id/stream": {
-      GET: (req) => {
-        const sessionId = req.params.id;
-        const stream = new ReadableStream({
-          start(ctrl) {
-            let sessionClients = sseClients.get(sessionId);
-            if (!sessionClients) {
-              sessionClients = new Set();
-              sseClients.set(sessionId, sessionClients);
-            }
-            sessionClients.add(ctrl);
-            // send a heartbeat immediately so the client knows it's connected
-            ctrl.enqueue(new TextEncoder().encode(": connected\n\n"));
-          },
-          cancel(ctrl) {
-            sseClients
-              .get(sessionId)
-              ?.delete(ctrl as ReadableStreamDefaultController);
-          },
-        });
-        return new Response(stream, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-          },
-        });
-      },
-    },
-  },
+// ── Timelines ────────────────────────────────────────────────────────────────
+app.get("/api/timelines", (c) => {
+  // TODO: list timelines for authenticated user
+  return c.json({ timelines: [] });
 });
+
+app.post("/api/timelines", async (c) => {
+  // TODO: create timeline
+  const body = await c.req.json();
+  return c.json({ id: crypto.randomUUID(), ...body }, 201);
+});
+
+app.get("/api/timelines/:id", (c) => {
+  // TODO: get timeline by id
+  return c.json({ id: c.req.param("id") });
+});
+
+app.patch("/api/timelines/:id", async (c) => {
+  // TODO: update timeline
+  const body = await c.req.json();
+  return c.json({ id: c.req.param("id"), ...body });
+});
+
+app.delete("/api/timelines/:id", (c) => {
+  // TODO: delete timeline
+  return c.json({ deleted: c.req.param("id") });
+});
+
+// ── Timeline Entries ─────────────────────────────────────────────────────────
+app.get("/api/timelines/:id/entries", (c) => {
+  // TODO: paginated entries for timeline
+  return c.json({ timelineId: c.req.param("id"), entries: [] });
+});
+
+app.post("/api/timelines/:id/entries", async (c) => {
+  // TODO: append entry + enqueue processing job atomically
+  const body = await c.req.json();
+  const entryId = crypto.randomUUID();
+  await boss.send("process-entry", {
+    timelineId: c.req.param("id"),
+    entryId,
+    ...body,
+  });
+  return c.json({ id: entryId }, 201);
+});
+
+// ── Document Sessions ─────────────────────────────────────────────────────────
+app.post("/api/sessions", async (c) => {
+  // TODO: start a Document Session from a Blue Document
+  const body = await c.req.json();
+  const sessionId = crypto.randomUUID();
+  await boss.send("initialize-session", { sessionId, ...body });
+  return c.json({ sessionId }, 202);
+});
+
+app.get("/api/sessions/:id", (c) => {
+  // TODO: get current Document Session state
+  return c.json({ sessionId: c.req.param("id"), state: null });
+});
+
+app.get("/api/sessions/:id/history", (c) => {
+  // TODO: get Document Session processing history
+  return c.json({ sessionId: c.req.param("id"), history: [] });
+});
+
+// ── SSE: real-time session state updates ──────────────────────────────────────
+app.get("/api/sessions/:id/stream", (c) => {
+  const sessionId = c.req.param("id");
+
+  return streamSSE(c, async (stream) => {
+    // send a heartbeat immediately so the client knows it's connected
+    await stream.writeSSE({ data: "", event: "connected" });
+
+    const write = (data: string) => {
+      stream.writeSSE({ data }).catch(() => {
+        sseClients.get(sessionId)?.delete(write);
+      });
+    };
+
+    let sessionClients = sseClients.get(sessionId);
+    if (!sessionClients) {
+      sessionClients = new Set();
+      sseClients.set(sessionId, sessionClients);
+    }
+    sessionClients.add(write);
+
+    // keep open until the client disconnects
+    await new Promise<void>((resolve) => {
+      c.req.raw.signal.addEventListener("abort", () => {
+        sseClients.get(sessionId)?.delete(write);
+        resolve();
+      });
+    });
+  });
+});
+
+export default {
+  port: PORT,
+  fetch: app.fetch,
+};
 
 console.log(`API listening on :${PORT}`);
