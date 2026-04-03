@@ -35,7 +35,7 @@ export default async function SignInPage({
                 redirectTo: callbackUrl ?? "/",
               });
             } catch (e) {
-              redirect("?error=CredentialsSignin", RedirectType.replace);
+              redirect("/signin?error=CredentialsSignin", RedirectType.replace);
             }
           }}
         >

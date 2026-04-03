@@ -8,11 +8,16 @@ export default async function DashboardPage() {
       <div style={styles.hero}>
         <h2 style={styles.heroTitle}>MyOS-like Document Session Dashboard</h2>
         <p style={styles.heroSubtitle}>
-          Process Blue Documents deterministically via Timelines and Document Sessions.
+          Process Blue Documents deterministically via Timelines and Document
+          Sessions.
         </p>
         <div style={styles.heroActions}>
-          <a href="/signin" style={styles.primaryButton}>Sign in</a>
-          <a href="/register" style={styles.secondaryButton}>Create an account</a>
+          <a href="/signin" style={styles.primaryButton}>
+            Sign in
+          </a>
+          <a href="/register" style={styles.secondaryButton}>
+            Create an account
+          </a>
         </div>
       </div>
     );
@@ -28,14 +33,16 @@ export default async function DashboardPage() {
         <a href="/timelines" style={styles.card}>
           <h3 style={styles.cardTitle}>Timelines</h3>
           <p style={styles.cardBody}>
-            Create and manage event timelines. Add entries to drive Document Sessions.
+            Create and manage event timelines. Add entries to drive Document
+            Sessions.
           </p>
         </a>
 
-        <a href="/sessions" style={styles.card}>
-          <h3 style={styles.cardTitle}>Document Sessions</h3>
+        <a href="/documents" style={styles.card}>
+          <h3 style={styles.cardTitle}>Manage Documents</h3>
           <p style={styles.cardBody}>
-            Start a session from a Blue Document and track deterministic state changes in real time.
+            View and manage your Documents. See how timelines have affected
+            them.
           </p>
         </a>
       </div>
