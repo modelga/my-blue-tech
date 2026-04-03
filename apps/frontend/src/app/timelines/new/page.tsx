@@ -15,18 +15,15 @@ export default async function NewTimelinePage() {
 
     const id = crypto.randomUUID();
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/timelines`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          name,
-          description: description || undefined,
-        }),
-      },
-    );
+    const res = await fetch(`/api/timelines`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        name,
+        description: description || undefined,
+      }),
+    });
 
     if (!res.ok) {
       // TODO: surface error to user once error handling is added
