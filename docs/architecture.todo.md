@@ -5,7 +5,6 @@
 | Service    | Port | Tech              | Role                                               |
 |------------|------|-------------------|----------------------------------------------------|
 | `postgres` | —    | PostgreSQL 16     | Primary DB, job queue (pg-boss), pub/sub (NOTIFY)  |
-| `keycloak` | 8080 | Keycloak 26       | OIDC auth, `blue` realm, PKCE for frontend         |
 | `api`      | 3001 | Bun (`Bun.serve`) | REST endpoints, SSE stream, pg-boss producer       |
 | `worker`   | —    | Bun               | pg-boss consumer, runs `DocumentProcessor`         |
 | `frontend` | 3000 | Next.js 15 + Bun  | Dashboard UI (standalone build)                    |
@@ -60,11 +59,9 @@ POST /api/sessions  ──enqueue initialize-session──►  worker
   Frontend receives the ping → fetches current state via `GET /api/sessions/:id`.
 - In-process fan-out: one LISTEN connection → `Map<sessionId, Set<ReadableStreamController>>` → N SSE responses.
 
-### Auth — Keycloak
-- Realm: `blue` (auto-imported from `infra/keycloak/realm.json` on first start).
-- `blue-frontend` client: public, PKCE (`S256`), redirect to `http://localhost:3000/*`.
-- `blue-api` client: confidential, service account only (for token introspection).
-- API validates Bearer JWTs against `KEYCLOAK_ISSUER` (`/realms/blue`).
+### Auth — Credentials at Frontend
+- For simplicity, the frontend holds credentials in SQLlite file (mounted as a volume) and uses them to store user login data. 
+- In production, this would be replaced with a proper auth service (e.g., Keycloak) and API token exchange.
 
 ### Determinism
 - Timeline Entries stored with a monotonically increasing sequence per `timelineId`.
@@ -87,8 +84,6 @@ apps/
 infra/
   postgres/
     init.sql         # creates the `keycloak` database on first start
-  keycloak/
-    realm.json       # blue realm definition
 docs/
   architecture.todo.md
 .env.example

@@ -16,6 +16,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Ensure /data exists for the SQLite volume mount.
+RUN mkdir -p /data
+
 # standalone output includes only what's needed to run
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

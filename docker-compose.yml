@@ -1,7 +1,6 @@
 name: blue
 
 services:
-
   # ── PostgreSQL ──────────────────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
@@ -21,44 +20,6 @@ services:
     networks:
       - blue
 
-  # ── Keycloak ────────────────────────────────────────────────────────────────
-  keycloak:
-    build:
-      context: ./infra/keycloak
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    command: start-dev --import-realm
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: ${POSTGRES_USER:-blue}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-blue}
-      KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: "8080"
-      KC_HOSTNAME_STRICT: "false"
-      KC_HTTP_ENABLED: "true"
-      KC_HEALTH_ENABLED: "true"
-    volumes:
-      - ./infra/keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
-    ports:
-      - "8080:8080"
-      - "9000:9000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      # Keycloak 26+ serves /health/ready on the management port (9000).
-      # Uses bash built-in /dev/tcp — no curl/wget needed.
-      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3 && grep -q UP <&3' 2>/dev/null || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 40s
-    networks:
-      - blue
-
   # ── API ─────────────────────────────────────────────────────────────────────
   api:
     build:
@@ -67,14 +28,11 @@ services:
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-blue}:${POSTGRES_PASSWORD:-blue}@postgres:5432/${POSTGRES_DB:-blue}
-      KEYCLOAK_ISSUER: http://keycloak:8080/realms/blue
       PORT: "3001"
     ports:
       - "3001:3001"
     depends_on:
       postgres:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -fs http://localhost:3001/health || exit 1"]
@@ -98,7 +56,7 @@ services:
       postgres:
         condition: service_healthy
     deploy:
-      replicas: 1   # increase for horizontal scale; pg-boss SKIP LOCKED handles concurrency
+      replicas: 1 # increase for horizontal scale; pg-boss SKIP LOCKED handles concurrency
     networks:
       - blue
 
@@ -110,9 +68,11 @@ services:
     restart: unless-stopped
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_KEYCLOAK_URL: http://localhost:8080
-      NEXT_PUBLIC_KEYCLOAK_REALM: blue
-      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: blue-frontend
+      AUTH_URL: http://localhost:3000
+      AUTH_SECRET: ${AUTH_SECRET:-changeme-in-production}
+      SQLITE_DB_PATH: /data/users.db
+    volumes:
+      - frontend_sqlite:/data
     ports:
       - "3000:3000"
     depends_on:
@@ -123,6 +83,7 @@ services:
 
 volumes:
   postgres_data:
+  frontend_sqlite:
 
 networks:
   blue:

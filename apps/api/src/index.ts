@@ -2,7 +2,6 @@ import PgBoss from "pg-boss";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
 const PORT = Number(process.env.PORT ?? 3001);
-const KEYCLOAK_ISSUER = process.env.KEYCLOAK_ISSUER!;
 
 const boss = new PgBoss(DATABASE_URL);
 await boss.start();
@@ -51,7 +50,10 @@ Bun.serve({
       POST: async (req) => {
         // TODO: create timeline
         const body = await req.json();
-        return Response.json({ id: crypto.randomUUID(), ...body }, { status: 201 });
+        return Response.json(
+          { id: crypto.randomUUID(), ...body },
+          { status: 201 },
+        );
       },
     },
     "/api/timelines/:id": {
@@ -80,7 +82,11 @@ Bun.serve({
         // TODO: append entry + enqueue processing job atomically
         const body = await req.json();
         const entryId = crypto.randomUUID();
-        await boss.send("process-entry", { timelineId: req.params.id, entryId, ...body });
+        await boss.send("process-entry", {
+          timelineId: req.params.id,
+          entryId,
+          ...body,
+        });
         return Response.json({ id: entryId }, { status: 201 });
       },
     },
@@ -114,13 +120,16 @@ Bun.serve({
         const sessionId = req.params.id;
         const stream = new ReadableStream({
           start(ctrl) {
-            if (!sseClients.has(sessionId)) sseClients.set(sessionId, new Set());
+            if (!sseClients.has(sessionId))
+              sseClients.set(sessionId, new Set());
             sseClients.get(sessionId)!.add(ctrl);
             // send a heartbeat immediately so the client knows it's connected
             ctrl.enqueue(new TextEncoder().encode(": connected\n\n"));
           },
           cancel(ctrl) {
-            sseClients.get(sessionId)?.delete(ctrl as ReadableStreamDefaultController);
+            sseClients
+              .get(sessionId)
+              ?.delete(ctrl as ReadableStreamDefaultController);
           },
         });
         return new Response(stream, {
@@ -136,4 +145,3 @@ Bun.serve({
 });
 
 console.log(`API listening on :${PORT}`);
-console.log(`Keycloak issuer: ${KEYCLOAK_ISSUER}`);
