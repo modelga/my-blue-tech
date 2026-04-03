@@ -1,3 +1,4 @@
+import { Client } from "pg";
 import PgBoss from "pg-boss";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
@@ -10,10 +11,10 @@ await boss.start();
 // to all active SSE response streams in-process.
 const sseClients = new Map<string, Set<ReadableStreamDefaultController>>();
 
-const { Client } = await import("pg");
 const pgListener = new Client({ connectionString: DATABASE_URL });
 await pgListener.connect();
 await pgListener.query("LISTEN session_updated");
+
 pgListener.on("notification", (msg) => {
   if (!msg.payload) return;
   const { sessionId, seq, event } = JSON.parse(msg.payload) as {
@@ -56,6 +57,7 @@ Bun.serve({
         );
       },
     },
+
     "/api/timelines/:id": {
       GET: (req) => {
         // TODO: get timeline by id
@@ -120,9 +122,12 @@ Bun.serve({
         const sessionId = req.params.id;
         const stream = new ReadableStream({
           start(ctrl) {
-            if (!sseClients.has(sessionId))
-              sseClients.set(sessionId, new Set());
-            sseClients.get(sessionId)!.add(ctrl);
+            let sessionClients = sseClients.get(sessionId);
+            if (!sessionClients) {
+              sessionClients = new Set();
+              sseClients.set(sessionId, sessionClients);
+            }
+            sessionClients.add(ctrl);
             // send a heartbeat immediately so the client knows it's connected
             ctrl.enqueue(new TextEncoder().encode(": connected\n\n"));
           },

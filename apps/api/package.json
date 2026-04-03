@@ -11,6 +11,8 @@
     "@blue-labs/document-processor": "latest",
     "@blue-labs/language": "latest",
     "@blue-repository/types": "latest",
+    "@types/pg": "^8.20.0",
+    "pg": "^8.20.0",
     "pg-boss": "^10.1.5"
   },
   "devDependencies": {
