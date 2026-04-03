@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { dump as dumpYaml, load as parseYaml } from "js-yaml";
 import { useRouter } from "next/navigation";
-import { load as parseYaml, dump as dumpYaml } from "js-yaml";
+import { useState } from "react";
 
 type Format = "json" | "yaml";
 
@@ -15,7 +15,10 @@ const EXAMPLES: Record<Format, string> = {
   yaml: `channels:\n  - name: main\n    timelineId: ""\n`,
 };
 
-function parsePayload(value: string, format: Format): { ok: true; data: unknown } | { ok: false; error: string } {
+function parsePayload(
+  value: string,
+  format: Format,
+): { ok: true; data: unknown } | { ok: false; error: string } {
   try {
     const data = format === "json" ? JSON.parse(value) : parseYaml(value);
     return { ok: true, data };
@@ -86,7 +89,9 @@ export default function NewDocumentPage() {
   return (
     <div>
       <div style={styles.header}>
-        <a href="/documents" style={styles.back}>← Documents</a>
+        <a href="/documents" style={styles.back}>
+          ← Documents
+        </a>
         <h2 style={styles.title}>New Blue Document</h2>
       </div>
 
@@ -134,11 +139,15 @@ export default function NewDocumentPage() {
               borderColor: payloadError ? "#fca5a5" : "#e5e7eb",
             }}
           />
-          {payloadError && <span style={styles.fieldError}>{payloadError}</span>}
+          {payloadError && (
+            <span style={styles.fieldError}>{payloadError}</span>
+          )}
         </div>
 
         <div style={styles.actions}>
-          <a href="/documents" style={styles.cancelButton}>Cancel</a>
+          <a href="/documents" style={styles.cancelButton}>
+            Cancel
+          </a>
           <button
             type="submit"
             disabled={pending || !!payloadError}

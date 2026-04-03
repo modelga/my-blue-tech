@@ -15,11 +15,18 @@ export default async function NewTimelinePage() {
 
     const id = crypto.randomUUID();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/timelines`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, name, description: description || undefined }),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/timelines`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          name,
+          description: description || undefined,
+        }),
+      },
+    );
 
     if (!res.ok) {
       // TODO: surface error to user once error handling is added
@@ -33,7 +40,9 @@ export default async function NewTimelinePage() {
   return (
     <div>
       <div style={styles.header}>
-        <a href="/timelines" style={styles.back}>← Timelines</a>
+        <a href="/timelines" style={styles.back}>
+          ← Timelines
+        </a>
         <h2 style={styles.title}>New Timeline</h2>
       </div>
 
@@ -60,7 +69,9 @@ export default async function NewTimelinePage() {
         </label>
 
         <div style={styles.actions}>
-          <a href="/timelines" style={styles.cancelButton}>Cancel</a>
+          <a href="/timelines" style={styles.cancelButton}>
+            Cancel
+          </a>
           <button type="submit" style={styles.submitButton}>
             Create Timeline
           </button>

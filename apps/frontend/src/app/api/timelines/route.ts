@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
   // TODO: forward to backend API once available
   // await fetch(`${process.env.API_URL}/timelines`, { method: "POST", ... })
 
-  console.log("[stub] Create timeline:", { id, name: name.trim(), description });
+  console.log("[stub] Create timeline:", {
+    id,
+    name: name.trim(),
+    description,
+  });
 
   return NextResponse.json(
     { ok: true, id, name: name.trim(), description },

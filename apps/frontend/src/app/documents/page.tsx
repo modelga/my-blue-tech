@@ -14,7 +14,9 @@ export default async function DocumentsPage() {
         </a>
       </div>
 
-      <p style={styles.empty}>No documents yet. Create one to start a Document Session.</p>
+      <p style={styles.empty}>
+        No documents yet. Create one to start a Document Session.
+      </p>
     </div>
   );
 }
