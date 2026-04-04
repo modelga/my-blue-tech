@@ -11,7 +11,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-blue}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-blue}"]
       interval: 5s
@@ -25,6 +24,7 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
+      target: ${API_TARGET:-production}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-blue}:${POSTGRES_PASSWORD:-blue}@postgres:5432/${POSTGRES_DB:-blue}
@@ -41,6 +41,15 @@ services:
       retries: 5
     networks:
       - blue
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./apps/api/src
+          target: /app/src
+        - action: rebuild
+          path: ./apps/api/package.json
+        - action: rebuild
+          path: ./apps/api/bun.lock
 
   # ── Worker ───────────────────────────────────────────────────────────────────
   # Runs pg-boss consumers for initialize-session and process-entry jobs.
@@ -65,8 +74,10 @@ services:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
+      target: ${FRONTEND_TARGET:-production}
     restart: unless-stopped
     environment:
+      API_URL: http://api:3001
       NEXT_PUBLIC_API_URL: http://localhost:3001
       AUTH_URL: http://localhost:3000
       AUTH_SECRET: ${AUTH_SECRET:-changeme-in-production}
@@ -80,6 +91,18 @@ services:
         condition: service_healthy
     networks:
       - blue
+    develop:
+      watch:
+        - action: sync
+          path: ./apps/frontend/src
+          target: /app/src
+        - action: sync
+          path: ./apps/frontend/public
+          target: /app/public
+        - action: rebuild
+          path: ./apps/frontend/package.json
+        - action: rebuild
+          path: ./apps/frontend/bun.lock
 
 volumes:
   postgres_data:

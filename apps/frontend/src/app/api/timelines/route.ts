@@ -1,9 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
+const API_URL = process.env.API_URL ?? "http://localhost:3001";
+
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session) {
+  if (!session?.user?.name) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -18,17 +20,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });
   }
 
-  // TODO: forward to backend API once available
-  // await fetch(`${process.env.API_URL}/timelines`, { method: "POST", ... })
-
-  console.log("[stub] Create timeline:", {
-    id,
-    name: name.trim(),
-    description,
+  const res = await fetch(`${API_URL}/api/timelines`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer user ${session.user.name}`,
+    },
+    body: JSON.stringify({ id, name: name.trim(), description }),
   });
 
-  return NextResponse.json(
-    { ok: true, id, name: name.trim(), description },
-    { status: 201 },
-  );
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
 }

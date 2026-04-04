@@ -1,10 +1,14 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { emptyState, newItemButton, pageHeader, pageTitle } from "@/lib/styles";
+import { getTimelines } from "@/lib/api";
+import { newItemButton, pageHeader, pageTitle } from "@/lib/styles";
+import { TimelineList } from "./Timelines";
 
 export default async function TimelinesPage() {
   const session = await auth();
   if (!session) redirect("/signin");
+
+  const timelines = await getTimelines();
 
   return (
     <div>
@@ -15,9 +19,7 @@ export default async function TimelinesPage() {
         </a>
       </div>
 
-      <p style={emptyState}>
-        No timelines yet. Create one to start adding entries.
-      </p>
+      <TimelineList timelines={timelines} />
     </div>
   );
 }
