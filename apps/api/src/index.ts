@@ -64,3 +64,6 @@ export default {
 };
 
 console.log(`API listening on :${PORT}`);
+
+// Signal readiness for the Docker file-based healthcheck.
+await Bun.write("/tmp/healthy", "ok");
