@@ -372,3 +372,65 @@ export const cardCopyButton: CSSProperties = {
   cursor: "pointer",
   color: colors.textMuted,
 };
+
+/** Secondary action link/button on a card (e.g. Open). */
+export const cardActionButton: CSSProperties = {
+  display: "inline-block",
+  marginTop: "0.75rem",
+  marginRight: "0.5rem",
+  padding: "0.25rem 0.75rem",
+  fontSize: "0.8rem",
+  color: colors.blue,
+  background: "transparent",
+  border: `1px solid ${colors.blue}`,
+  borderRadius: radius.sm,
+  textDecoration: "none",
+  cursor: "pointer",
+};
+
+// ── Timeline entry list ───────────────────────────────────────────────────────
+
+/** Vertical stack of entry rows. */
+export const entryList: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.75rem",
+  marginTop: "1rem",
+};
+
+/** Single entry row card. */
+export const entryRow: CSSProperties = {
+  background: colors.white,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.md,
+  padding: "0.875rem 1rem",
+};
+
+/** Seq + timestamp header inside an entry row. */
+export const entryRowHeader: CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "baseline",
+  marginBottom: "0.5rem",
+};
+
+export const entrySeq: CSSProperties = {
+  fontWeight: 600,
+  fontSize: "0.8rem",
+  color: colors.textMuted,
+};
+
+export const entryTimestamp: CSSProperties = {
+  fontSize: "0.75rem",
+  color: colors.textMuted,
+};
+
+/** Pre-formatted JSON payload inside an entry row. */
+export const entryPayload: CSSProperties = {
+  margin: 0,
+  fontSize: "0.8rem",
+  fontFamily: "ui-monospace, SFMono-Regular, monospace",
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-all",
+  color: colors.textBody,
+};

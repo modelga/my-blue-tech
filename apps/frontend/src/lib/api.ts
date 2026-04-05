@@ -43,3 +43,34 @@ export async function getTimelines(): Promise<Timeline[]> {
 export async function deleteTimeline(id: string): Promise<void> {
   await apiRequest(`/api/timelines/${id}`, { method: "DELETE" });
 }
+
+export async function getTimeline(id: string): Promise<Timeline> {
+  return apiRequest<Timeline>(`/api/timelines/${id}`);
+}
+
+// ── Timeline Entries ──────────────────────────────────────────────────────────
+
+export interface TimelineEntry {
+  id: string;
+  timeline_id: string;
+  seq: number;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+export async function getTimelineEntries(timelineId: string): Promise<TimelineEntry[]> {
+  const data = await apiRequest<{ timelineId: string; entries: TimelineEntry[] }>(
+    `/api/timelines/${timelineId}/entries`,
+  );
+  return data.entries;
+}
+
+export async function pushTimelineEntry(
+  timelineId: string,
+  payload: Record<string, unknown>,
+): Promise<TimelineEntry> {
+  return apiRequest<TimelineEntry>(`/api/timelines/${timelineId}/entries`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}

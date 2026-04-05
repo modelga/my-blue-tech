@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deleteTimeline, type Timeline } from "@/lib/api";
 import {
+  cardActionButton,
   cardCopyButton,
   cardDeleteButton,
   cardIdRow,
@@ -69,14 +70,17 @@ export function TimelineList({
           {t.description && <p style={dashCardBody}>{t.description}</p>}
           <CopyIdButton id={t.id} />
           <p style={cardMeta}>{new Date(t.created_at).toLocaleDateString()}</p>
-          <button
-            type="button"
-            style={{ ...cardDeleteButton, opacity: deleting === t.id ? 0.5 : 1 }}
+          <div>
+            <a href={`/timelines/${t.id}`} style={cardActionButton}>Open</a>
+            <button
+              type="button"
+              style={{ ...cardDeleteButton, opacity: deleting === t.id ? 0.5 : 1 }}
             disabled={deleting === t.id}
             onClick={() => handleDelete(t.id)}
           >
-            {deleting === t.id ? "Deleting…" : "Delete"}
-          </button>
+              {deleting === t.id ? "Deleting…" : "Delete"}
+            </button>
+          </div>
         </div>
       ))}
     </div>
