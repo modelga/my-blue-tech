@@ -361,6 +361,42 @@ export const cardIdText: CSSProperties = {
   wordBreak: "break-all",
 };
 
+// ── Payload editor ────────────────────────────────────────────────────────────
+
+/** Header row inside a payload editor: label left, format toggle right. */
+export const payloadEditorHeader: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+/** Container for the JSON / YAML toggle buttons. */
+export const payloadFormatToggle: CSSProperties = {
+  display: "flex",
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.sm,
+  overflow: "hidden",
+};
+
+/** Individual format toggle button (inactive state). */
+export const payloadFormatButton: CSSProperties = {
+  padding: "0.2rem 0.75rem",
+  background: colors.white,
+  color: colors.textMuted,
+  border: "none",
+  borderRight: `1px solid ${colors.border}`,
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  cursor: "pointer",
+  letterSpacing: "0.05em",
+};
+
+/** Active state overlay for the selected format button. */
+export const payloadFormatButtonActive: CSSProperties = {
+  background: colors.blue,
+  color: colors.white,
+};
+
 /** Small ghost button next to a UUID for copying to clipboard. */
 export const cardCopyButton: CSSProperties = {
   flexShrink: 0,

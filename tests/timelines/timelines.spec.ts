@@ -35,14 +35,14 @@ test.describe("Timelines", () => {
     await page.getByRole("button", { name: /create timeline/i }).click();
 
     await expect(page).toHaveURL("http://localhost:3000/timelines");
-    await expect(page.getByText(timelineName)).toBeVisible();
-    await expect(page.getByText(timelineDescription)).toBeVisible();
+    await expect(page.locator("p", { hasText: timelineName })).toBeVisible();
+    await expect(page.locator("p", { hasText: timelineDescription })).toBeVisible();
   });
 
   test("created timeline persists after page reload", async ({ page }) => {
     await page.goto("/timelines");
 
-    await expect(page.getByText(timelineName)).toBeVisible();
+    await expect(page.locator("p", { hasText: timelineName })).toBeVisible();
   });
 
   test.describe("Delete timeline", () => {
@@ -55,18 +55,19 @@ test.describe("Timelines", () => {
       await page.getByRole("button", { name: /create timeline/i }).click();
       await expect(page).toHaveURL("http://localhost:3000/timelines");
 
-      const card = page.locator("div").filter({ hasText: deleteName }).first();
+      // Locate the card via the title <p> then step up to its parent div.
+      const card = page.locator("p", { hasText: deleteName }).locator("xpath=..");
       await expect(card.getByRole("button", { name: /delete/i })).toBeVisible();
     });
 
     test("clicking delete removes the timeline from the list immediately", async ({ page }) => {
       await page.goto("/timelines");
-      await expect(page.getByText(deleteName)).toBeVisible();
+      await expect(page.locator("p", { hasText: deleteName })).toBeVisible();
 
-      const card = page.locator("div").filter({ hasText: deleteName }).first();
+      const card = page.locator("p", { hasText: deleteName }).locator("xpath=..");
       await card.getByRole("button", { name: /delete/i }).click();
 
-      await expect(page.getByText(deleteName)).not.toBeVisible();
+      await expect(page.locator("p", { hasText: deleteName })).not.toBeVisible();
     });
 
     test("deleted timeline does not reappear after page reload", async ({ page }) => {

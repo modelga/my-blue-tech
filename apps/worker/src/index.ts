@@ -18,29 +18,23 @@ await boss.start();
 // ── initialize-session ───────────────────────────────────────────────────────
 // Receives a Blue Document (YAML string), initializes it via DocumentProcessor,
 // persists the initial state, and notifies via NOTIFY.
-await boss.work<{ sessionId: string; yaml: string }>(
-  "initialize-session",
-  { teamSize: 1 },
-  async (job) => {
-    const { sessionId, yaml } = job.data;
-    console.log(`[initialize-session] sessionId=${sessionId}`);
+await boss.work<{ sessionId: string; yaml: string }>("initialize-session", { teamSize: 1 }, async (job) => {
+  const { sessionId, yaml } = job.data;
+  console.log(`[initialize-session] sessionId=${sessionId}`);
 
-    const document = blue.yamlToNode(yaml);
-    const result = await processor.initializeDocument(document);
+  const document = blue.yamlToNode(yaml);
+  const result = await processor.initializeDocument(document);
 
-    if (result.capabilityFailure) {
-      console.error(
-        `[initialize-session] capability failure: ${result.failureReason}`,
-      );
-      throw new Error(result.failureReason ?? "capability failure");
-    }
+  if (result.capabilityFailure) {
+    console.error(`[initialize-session] capability failure: ${result.failureReason}`);
+    throw new Error(result.failureReason ?? "capability failure");
+  }
 
-    // TODO: persist result.document (serialized) to document_sessions table
-    //   UPDATE document_sessions SET state = $1, seq = seq + 1 WHERE id = $2
-    await notify(DATABASE_URL, sessionId, 0, "initialized");
-    console.log(`[initialize-session] done sessionId=${sessionId}`);
-  },
-);
+  // TODO: persist result.document (serialized) to document_sessions table
+  //   UPDATE document_sessions SET state = $1, seq = seq + 1 WHERE id = $2
+  await notify(DATABASE_URL, sessionId, 0, "initialized");
+  console.log(`[initialize-session] done sessionId=${sessionId}`);
+});
 
 // ── process-entry ────────────────────────────────────────────────────────────
 // Receives a timeline entry event, loads the current session state, runs
@@ -62,9 +56,7 @@ await boss.work<{
   const result = await processor.processDocument(currentDocument, event);
 
   if (result.capabilityFailure) {
-    console.error(
-      `[process-entry] capability failure: ${result.failureReason}`,
-    );
+    console.error(`[process-entry] capability failure: ${result.failureReason}`);
     throw new Error(result.failureReason ?? "capability failure");
   }
 
@@ -75,19 +67,12 @@ await boss.work<{
   console.log(`[process-entry] done sessionId=${sessionId}`);
 });
 
-async function notify(
-  connectionString: string,
-  sessionId: string,
-  seq: number,
-  event: string,
-): Promise<void> {
+async function notify(connectionString: string, sessionId: string, seq: number, event: string): Promise<void> {
   const client = new Client({ connectionString });
   await client.connect();
   try {
     const payload = JSON.stringify({ sessionId, seq, event });
-    await client.query(
-      `NOTIFY session_updated, '${payload.replace(/'/g, "''")}'`,
-    );
+    await client.query(`NOTIFY session_updated, '${payload.replace(/'/g, "''")}'`);
   } finally {
     await client.end();
   }
