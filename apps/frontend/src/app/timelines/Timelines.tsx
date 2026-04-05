@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deleteTimeline, type Timeline } from "@/lib/api";
 import {
-  colors,
+  cardCopyButton,
+  cardDeleteButton,
+  cardIdRow,
+  cardIdText,
+  cardMeta,
   dashCard,
   dashCardBody,
   dashCardTitle,
@@ -12,16 +16,24 @@ import {
   emptyState,
 } from "@/lib/styles";
 
-const deleteButton: React.CSSProperties = {
-  marginTop: "0.75rem",
-  padding: "0.25rem 0.75rem",
-  fontSize: "0.8rem",
-  color: colors.errorText,
-  background: "transparent",
-  border: `1px solid ${colors.errorBorder}`,
-  borderRadius: 6,
-  cursor: "pointer",
-};
+function CopyIdButton({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }
+
+  return (
+    <div style={cardIdRow}>
+      <span style={cardIdText} title={id}>{id}</span>
+      <button type="button" style={cardCopyButton} onClick={handleCopy}>
+        {copied ? "Copied!" : "Copy"}
+      </button>
+    </div>
+  );
+}
 
 export function TimelineList({
   timelines: initial,
@@ -55,19 +67,11 @@ export function TimelineList({
         <div key={t.id} style={dashCard}>
           <p style={dashCardTitle}>{t.name}</p>
           {t.description && <p style={dashCardBody}>{t.description}</p>}
-          <p
-            style={{
-              ...dashCardBody,
-              marginTop: "0.75rem",
-              color: colors.textMuted,
-              fontSize: "0.8rem",
-            }}
-          >
-            {new Date(t.created_at).toLocaleDateString()}
-          </p>
+          <CopyIdButton id={t.id} />
+          <p style={cardMeta}>{new Date(t.created_at).toLocaleDateString()}</p>
           <button
             type="button"
-            style={{ ...deleteButton, opacity: deleting === t.id ? 0.5 : 1 }}
+            style={{ ...cardDeleteButton, opacity: deleting === t.id ? 0.5 : 1 }}
             disabled={deleting === t.id}
             onClick={() => handleDelete(t.id)}
           >

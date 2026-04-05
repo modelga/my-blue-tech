@@ -321,3 +321,54 @@ export const heroSecondaryButton: CSSProperties = {
   fontWeight: 600,
   fontSize: "1rem",
 };
+
+// ── Item cards ────────────────────────────────────────────────────────────────
+
+/** Muted small text row below a card body (e.g. creation date). */
+export const cardMeta: CSSProperties = {
+  margin: 0,
+  marginTop: "0.5rem",
+  color: colors.textMuted,
+  lineHeight: 1.6,
+  fontSize: "0.8rem",
+};
+
+/** Destructive ghost button used on list cards (e.g. Delete). */
+export const cardDeleteButton: CSSProperties = {
+  marginTop: "0.75rem",
+  padding: "0.25rem 0.75rem",
+  fontSize: "0.8rem",
+  color: colors.errorText,
+  background: "transparent",
+  border: `1px solid ${colors.errorBorder}`,
+  borderRadius: radius.sm,
+  cursor: "pointer",
+};
+
+/** Row that displays a monospace ID alongside a copy button. */
+export const cardIdRow: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.4rem",
+  marginTop: "0.5rem",
+};
+
+/** Monospace UUID text inside a card. */
+export const cardIdText: CSSProperties = {
+  fontFamily: "ui-monospace, SFMono-Regular, monospace",
+  fontSize: "0.72rem",
+  color: colors.textMuted,
+  wordBreak: "break-all",
+};
+
+/** Small ghost button next to a UUID for copying to clipboard. */
+export const cardCopyButton: CSSProperties = {
+  flexShrink: 0,
+  padding: "0.15rem 0.5rem",
+  fontSize: "0.72rem",
+  background: "transparent",
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.sm,
+  cursor: "pointer",
+  color: colors.textMuted,
+};
