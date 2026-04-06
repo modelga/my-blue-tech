@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { PayloadEditor, type Format } from "@/components/PayloadEditor";
+import { type Format, PayloadEditor } from "@/components/PayloadEditor";
 import { pushTimelineEntry, type Timeline, type TimelineEntry } from "@/lib/api";
 import {
   colors,
@@ -20,26 +20,14 @@ import {
 } from "@/lib/styles";
 
 const MESSAGE_EXAMPLES: Record<Format, string> = {
-  json: JSON.stringify(
-    { type: "Conversation/Operation Request", operation: "increment", request: 1 },
-    null,
-    2,
-  ),
+  json: JSON.stringify({ type: "Conversation/Operation Request", operation: "increment", request: 1 }, null, 2),
   yaml: `type: Conversation/Operation Request\noperation: increment\nrequest: 1\n`,
 };
 
-export function TimelineDetail({
-  timeline,
-  entries: initial,
-  userName,
-}: {
-  timeline: Timeline;
-  entries: TimelineEntry[];
-  userName: string;
-}) {
+export function TimelineDetail({ timeline, entries: initial }: { timeline: Timeline; entries: TimelineEntry[] }) {
   const router = useRouter();
   const [entries, setEntries] = useState(initial);
-  const [parsedMessage, setParsedMessage] = useState<unknown | null>(null);
+  const [parsedMessage, setParsedMessage] = useState<unknown | null>(JSON.parse(MESSAGE_EXAMPLES.json));
   const [messageError, setMessageError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -53,22 +41,9 @@ export function TimelineDetail({
       return;
     }
 
-    const envelope = {
-      type: "MyOS/MyOS Timeline Entry",
-      message: parsedMessage,
-      actor: {
-        type: "MyOS/Principal Actor",
-        accountId: userName,
-      },
-      timeline: {
-        timelineId: timeline.id,
-      },
-      timestamp: Date.now(),
-    };
-
     setPending(true);
     try {
-      const entry = await pushTimelineEntry(timeline.id, envelope);
+      const entry = await pushTimelineEntry(timeline.id, parsedMessage as Record<string, unknown>);
       setEntries((prev) => [...prev, entry]);
       router.refresh();
     } catch (err) {
@@ -80,9 +55,7 @@ export function TimelineDetail({
 
   return (
     <div>
-      <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.1rem", color: colors.textBody }}>
-        Entries
-      </h3>
+      <h3 style={{ margin: "0 0 1.5rem", fontSize: "1.1rem", color: colors.textBody }}>Entries</h3>
 
       {entries.length === 0 ? (
         <p style={emptyState}>No entries yet. Push the first one below.</p>
@@ -92,9 +65,7 @@ export function TimelineDetail({
             <div key={e.id} style={entryRow}>
               <div style={entryRowHeader}>
                 <span style={entrySeq}>#{e.seq}</span>
-                <span style={entryTimestamp}>
-                  {new Date(e.created_at).toLocaleString()}
-                </span>
+                <span style={entryTimestamp}>{new Date(e.created_at).toLocaleString()}</span>
               </div>
               <pre style={entryPayload}>{JSON.stringify(e.payload, null, 2)}</pre>
             </div>
@@ -102,9 +73,7 @@ export function TimelineDetail({
         </div>
       )}
 
-      <h3 style={{ margin: "2rem 0 1rem", fontSize: "1.1rem", color: colors.textBody }}>
-        Push Entry
-      </h3>
+      <h3 style={{ margin: "2rem 0 1rem", fontSize: "1.1rem", color: colors.textBody }}>Push Entry</h3>
 
       <form onSubmit={handlePush} style={formCard}>
         {error && <p style={errorBanner}>{error}</p>}

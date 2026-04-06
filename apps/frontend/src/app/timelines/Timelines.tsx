@@ -28,7 +28,9 @@ function CopyIdButton({ id }: { id: string }) {
 
   return (
     <div style={cardIdRow}>
-      <span style={cardIdText} title={id}>{id}</span>
+      <span style={cardIdText} title={id}>
+        {id}
+      </span>
       <button type="button" style={cardCopyButton} onClick={handleCopy}>
         {copied ? "Copied!" : "Copy"}
       </button>
@@ -36,11 +38,7 @@ function CopyIdButton({ id }: { id: string }) {
   );
 }
 
-export function TimelineList({
-  timelines: initial,
-}: {
-  timelines: Timeline[];
-}) {
+export function TimelineList({ timelines: initial }: { timelines: Timeline[] }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -55,11 +53,7 @@ export function TimelineList({
   }
 
   if (initial.length === 0) {
-    return (
-      <p style={emptyState}>
-        No timelines yet. Create one to start adding entries.
-      </p>
-    );
+    return <p style={emptyState}>No timelines yet. Create one to start adding entries.</p>;
   }
 
   return (
@@ -71,13 +65,15 @@ export function TimelineList({
           <CopyIdButton id={t.id} />
           <p style={cardMeta}>{new Date(t.created_at).toLocaleDateString()}</p>
           <div>
-            <a href={`/timelines/${t.id}`} style={cardActionButton}>Open</a>
+            <a href={`/timelines/${t.id}`} style={cardActionButton}>
+              Open
+            </a>
             <button
               type="button"
               style={{ ...cardDeleteButton, opacity: deleting === t.id ? 0.5 : 1 }}
-            disabled={deleting === t.id}
-            onClick={() => handleDelete(t.id)}
-          >
+              disabled={deleting === t.id}
+              onClick={() => handleDelete(t.id)}
+            >
               {deleting === t.id ? "Deleting…" : "Delete"}
             </button>
           </div>

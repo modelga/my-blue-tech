@@ -30,7 +30,7 @@ export default async function TimelinePage({ params }: { params: Promise<{ id: s
         )}
       </div>
 
-      <TimelineDetail timeline={timeline} entries={entries} userName={session.user!.name!} />
+      <TimelineDetail timeline={timeline} entries={entries} />
     </div>
   );
 }

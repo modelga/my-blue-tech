@@ -1,12 +1,10 @@
 import { Hono } from "hono";
 import type PgBoss from "pg-boss";
+import { blue } from "../lib/blue";
 import type { Variables } from "../lib/types";
 import type { TimelineRepository } from "../repositories/timeline.repository";
 
-export function timelinesRouter(
-  boss: PgBoss,
-  timelineRepo: TimelineRepository,
-) {
+export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) {
   const app = new Hono<{ Variables: Variables }>();
 
   // ── Timelines ──────────────────────────────────────────────────────────────
@@ -19,18 +17,8 @@ export function timelinesRouter(
 
   app.post("/", async (c) => {
     const owner = c.get("userName");
-    const body = await c.req.json<{
-      id?: string;
-      name: string;
-      description?: string;
-    }>();
-    const id = body.id ?? crypto.randomUUID();
-    const timeline = await timelineRepo.create(
-      id,
-      owner,
-      body.name,
-      body.description ?? "",
-    );
+    const body = await c.req.json<{ name: string; description?: string }>();
+    const timeline = await timelineRepo.create(crypto.randomUUID(), owner, body.name, body.description ?? "");
     return c.json(timeline, 201);
   });
 
@@ -42,11 +30,7 @@ export function timelinesRouter(
 
   app.patch("/:id", async (c) => {
     const body = await c.req.json<{ name: string; description?: string }>();
-    const timeline = await timelineRepo.update(
-      c.req.param("id"),
-      body.name,
-      body.description ?? "",
-    );
+    const timeline = await timelineRepo.update(c.req.param("id"), body.name, body.description ?? "");
     if (!timeline) return c.json({ error: "Not found" }, 404);
     return c.json(timeline);
   });
@@ -65,12 +49,30 @@ export function timelinesRouter(
   });
 
   app.post("/:id/entries", async (c) => {
-    const body = await c.req.json<Record<string, unknown>>();
+    const message = await c.req.json<Record<string, unknown>>();
+
+    try {
+      blue.jsonValueToNode(message);
+    } catch (err) {
+      return c.json({ error: `Invalid Blue payload: ${(err as Error).message}` }, 400);
+    }
+
     const entryId = crypto.randomUUID();
     const timelineId = c.req.param("id");
 
-    const entry = await timelineRepo.appendEntry(entryId, timelineId, body);
-    await boss.send("process-entry", { timelineId, entryId, ...body });
+    const payload = {
+      type: "MyOS/MyOS Timeline Entry",
+      message,
+      actor: {
+        type: "MyOS/Principal Actor",
+        accountId: c.get("userName"),
+      },
+      timeline: { timelineId },
+      timestamp: Date.now(),
+    };
+
+    const entry = await timelineRepo.appendEntry(entryId, timelineId, payload);
+    await boss.send("process-entry", { timelineId, entryId, payload });
     return c.json(entry, 201);
   });
 

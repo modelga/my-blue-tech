@@ -10,11 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { id, name, description } = body;
-
-  if (!id || typeof id !== "string") {
-    return NextResponse.json({ error: "id is required." }, { status: 400 });
-  }
+  const { name, description } = body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });
@@ -26,7 +22,7 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
       Authorization: `Bearer user ${session.user.name}`,
     },
-    body: JSON.stringify({ id, name: name.trim(), description }),
+    body: JSON.stringify({ name: name.trim(), description }),
   });
 
   const data = await res.json();

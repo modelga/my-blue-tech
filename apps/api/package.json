@@ -9,12 +9,13 @@
   },
   "dependencies": {
     "@blue-labs/document-processor": "latest",
-    "@blue-labs/language": "latest",
-    "@blue-repository/types": "latest",
+    "@blue-labs/language": "^3.9.2",
+    "@blue-repository/types": "^0.25.0",
     "@types/pg": "^8.20.0",
     "hono": "^4.12.10",
     "pg": "^8.20.0",
-    "pg-boss": "^10.1.5"
+    "pg-boss": "^10.1.5",
+    "zod": "3"
   },
   "devDependencies": {
     "@types/bun": "latest",

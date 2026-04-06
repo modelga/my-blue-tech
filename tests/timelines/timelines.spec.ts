@@ -35,14 +35,22 @@ test.describe("Timelines", () => {
     await page.getByRole("button", { name: /create timeline/i }).click();
 
     await expect(page).toHaveURL("http://localhost:3000/timelines");
-    await expect(page.locator("p", { hasText: timelineName })).toBeVisible();
-    await expect(page.locator("p", { hasText: timelineDescription })).toBeVisible();
+    const card = page.locator("p", { hasText: timelineName }).locator("xpath=..");
+    await expect(card.locator("p", { hasText: timelineName })).toBeVisible();
+    await expect(card.locator("p", { hasText: timelineDescription })).toBeVisible();
   });
 
   test("created timeline persists after page reload", async ({ page }) => {
+    // Create a dedicated timeline so this test is self-contained across retries.
+    const persistName = `E2E Persist ${uid}`;
+    await page.goto("/timelines/new");
+    await page.fill('input[name="name"]', persistName);
+    await page.getByRole("button", { name: /create timeline/i }).click();
+    await expect(page).toHaveURL("http://localhost:3000/timelines");
+
     await page.goto("/timelines");
 
-    await expect(page.locator("p", { hasText: timelineName })).toBeVisible();
+    await expect(page.locator("p", { hasText: persistName })).toBeVisible();
   });
 
   test.describe("Delete timeline", () => {

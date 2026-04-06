@@ -30,12 +30,10 @@ export default function NewTimelinePage() {
     const name = (fd.get("name") as string).trim();
     const description = (fd.get("description") as string).trim();
 
-    const id = crypto.randomUUID();
-
     const res = await fetch("/api/timelines", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, name, description: description || undefined }),
+      body: JSON.stringify({ name, description: description || undefined }),
     });
 
     if (res.ok) {
