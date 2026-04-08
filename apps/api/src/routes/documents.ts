@@ -1,6 +1,7 @@
 import type { BlueNode } from "@blue-labs/language";
 import repository from "@blue-repository/types";
 import { Hono } from "hono";
+import { createMiddleware } from "hono/factory";
 import { streamSSE } from "hono/streaming";
 import type PgBoss from "pg-boss";
 import * as _ from "radash";
@@ -8,19 +9,13 @@ import { blue } from "../lib/blue";
 import type { Variables } from "../lib/types";
 import type { DocumentRepository } from "../repositories/document.repository";
 import type { TimelineRepository } from "../repositories/timeline.repository";
-export function documentsRouter(
-  boss: PgBoss,
-  sseClients: Map<string, Set<(data: string) => void>>,
-  documentRepo: DocumentRepository,
-  timelineRepo: TimelineRepository,
-) {
-  const app = new Hono<{ Variables: Variables }>();
 
-  // ── Blue Documents ──────────────────────────────────────────────────────────
+type Env = { Variables: Variables & { blueDoc: BlueNode } };
 
-  app.post("/", async (c) => {
-    const owner = c.get("userName");
+function validateBlueDocumentContracts(timelineRepo: TimelineRepository) {
+  return createMiddleware<Env>(async (c, next) => {
     const body = await c.req.json<{ name: string; definition: Record<string, unknown> }>();
+
     let doc: BlueNode;
     try {
       doc = blue.jsonValueToNode(body.definition);
@@ -52,10 +47,28 @@ export function documentsRouter(
     );
 
     const errors = _.sift(validationResults.flat());
-
     if (errors.length > 0) {
       return c.json({ error: "Blue document contract validation error", details: errors }, 400);
     }
+
+    c.set("blueDoc", doc);
+    await next();
+  });
+}
+
+export function documentsRouter(
+  boss: PgBoss,
+  sseClients: Map<string, Set<(data: string) => void>>,
+  documentRepo: DocumentRepository,
+  timelineRepo: TimelineRepository,
+) {
+  const app = new Hono<Env>();
+
+  // ── Blue Documents ──────────────────────────────────────────────────────────
+
+  app.post("/", validateBlueDocumentContracts(timelineRepo), async (c) => {
+    const owner = c.get("userName");
+    const body = await c.req.json<{ name: string; definition: Record<string, unknown> }>();
     const documentId = crypto.randomUUID();
 
     const document = await documentRepo.create(documentId, owner, body.name, body.definition);
@@ -92,7 +105,6 @@ export function documentsRouter(
     const documentId = c.req.param("id");
 
     return streamSSE(c, async (stream) => {
-      // send a heartbeat immediately so the client knows it's connected
       await stream.writeSSE({ data: "", event: "connected" });
 
       const write = (data: string) => {
@@ -108,7 +120,6 @@ export function documentsRouter(
       }
       documentClients.add(write);
 
-      // keep open until the client disconnects
       await new Promise<void>((resolve) => {
         c.req.raw.signal.addEventListener("abort", () => {
           sseClients.get(documentId)?.delete(write);
