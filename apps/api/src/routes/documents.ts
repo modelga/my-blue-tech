@@ -46,7 +46,7 @@ function validateBlueDocumentContracts(timelineRepo: TimelineRepository) {
       }),
     );
 
-    const errors = _.sift(validationResults.flat());
+    const errors = _.sift(validationResults.flat()).map((e) => e.message);
     if (errors.length > 0) {
       return c.json({ error: "Blue document contract validation error", details: errors }, 400);
     }

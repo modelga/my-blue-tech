@@ -3,8 +3,9 @@
 import { load as parseYaml } from "js-yaml";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ErrorBanner } from "@/components/ErrorBanner";
 import { type Format, PayloadEditor } from "@/components/PayloadEditor";
-import { cancelButton, errorBanner, formActions, formBack, formCard, formInput, formLabel, formPageHeader, pageTitle, submitButton } from "@/lib/styles";
+import { cancelButton, formActions, formBack, formCard, formInput, formLabel, formPageHeader, pageTitle, submitButton } from "@/lib/styles";
 
 const EXAMLE_DOCUMENT = `
   name: Counter
@@ -58,6 +59,7 @@ export default function NewDocumentPage() {
   const [parsed, setParsed] = useState<unknown | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<unknown[]>([]);
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -68,6 +70,7 @@ export default function NewDocumentPage() {
     }
 
     setError(null);
+    setErrorDetails([]);
     // setPending(true);
 
     const res = await fetch("/api/documents", {
@@ -81,6 +84,7 @@ export default function NewDocumentPage() {
     } else {
       const body = await res.json().catch(() => ({}));
       setError(body.error ?? "Failed to create document.");
+      setErrorDetails(body.details ?? []);
       setPending(false);
     }
   }
@@ -95,7 +99,7 @@ export default function NewDocumentPage() {
       </div>
 
       <form onSubmit={handleSubmit} style={formCard}>
-        {error && <p style={errorBanner}>{error}</p>}
+        {error && <ErrorBanner error={error} details={errorDetails} />}
 
         <label style={formLabel}>
           Name

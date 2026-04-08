@@ -244,6 +244,14 @@ export const fieldError: CSSProperties = {
   color: colors.errorText,
 };
 
+export const errorDetailList: CSSProperties = {
+  margin: "0.5rem 0 0",
+  paddingLeft: "1.25rem",
+  fontSize: "0.8rem",
+  color: colors.errorText,
+  lineHeight: 1.6,
+};
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 export const dashGrid: CSSProperties = {
