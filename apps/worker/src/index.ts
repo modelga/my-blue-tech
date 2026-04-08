@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import PgBoss from "pg-boss";
+import { PgBoss } from "pg-boss";
 import { startDocumentWorker } from "./workers/document.worker";
 import { startTimelineWorker } from "./workers/timeline.worker";
 
@@ -11,7 +11,7 @@ const boss = new PgBoss(DATABASE_URL);
 boss.on("error", (err) => console.error("[pg-boss]", err));
 await boss.start();
 
-startDocumentWorker(boss, pool);
-startTimelineWorker(boss, pool);
+await startDocumentWorker(boss, pool);
+await startTimelineWorker(boss, pool);
 
 console.log("[worker] started — listening for jobs via pg-boss");

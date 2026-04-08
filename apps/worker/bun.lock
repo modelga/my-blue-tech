@@ -3,21 +3,19 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "@blue/api",
+      "name": "@blue/worker",
       "dependencies": {
         "@blue-labs/document-processor": "latest",
-        "@blue-labs/language": "^3.9.2",
-        "@blue-repository/types": "^0.25.0",
-        "@types/pg": "^8.20.0",
-        "hono": "^4.12.12",
+        "@blue-labs/language": "latest",
+        "@blue-repository/types": "latest",
+        "json-diff-ts": "4.10.4",
         "pg": "^8.20.0",
         "pg-boss": "^12.15.0",
-        "radash": "12.1.1",
-        "zod": "3",
       },
       "devDependencies": {
         "@types/bun": "latest",
-        "typescript": "^5",
+        "@types/pg": "^8.20.0",
+        "typescript": "^5.9.3",
       },
     },
   },
@@ -70,11 +68,11 @@
 
     "fast-deep-equal": ["fast-deep-equal@3.1.3", "", {}, "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q=="],
 
-    "hono": ["hono@4.12.12", "", {}, "sha512-p1JfQMKaceuCbpJKAPKVqyqviZdS0eUxH9v82oWo1kb9xjQ5wA6iP3FNVAPDFlz5/p7d45lO+BpSk1tuSZMF4Q=="],
-
     "js-sha256": ["js-sha256@0.11.1", "", {}, "sha512-o6WSo/LUvY2uC4j7mO50a2ms7E/EAdbP0swigLV+nzHKTTaYnaLIWJ02VdXrsJX0vGedDESQnLsOekr94ryfjg=="],
 
     "js-yaml": ["js-yaml@4.1.1", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA=="],
+
+    "json-diff-ts": ["json-diff-ts@4.10.4", "", {}, "sha512-/Ipg6migsLtNQQz+I3jm+hnPGZx4x47cVXTr4tgvxepQJKIB5iDmyguxicZ/59wIg3OlGgIGwIMftn+LqT8lNQ=="],
 
     "luxon": ["luxon@3.7.2", "", {}, "sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew=="],
 

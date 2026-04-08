@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { Client, Pool } from "pg";
-import PgBoss from "pg-boss";
+import { PgBoss } from "pg-boss";
 import { authMiddleware } from "./lib/auth";
 import type { Variables } from "./lib/types";
 import { DocumentRepository } from "./repositories/document.repository";
@@ -53,10 +53,7 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 
 app.use("/api/*", authMiddleware);
 app.route("/api/timelines", timelinesRouter(boss, timelineRepo));
-app.route(
-  "/api/documents",
-  documentsRouter(boss, sseClients, documentRepo, timelineRepo),
-);
+app.route("/api/documents", documentsRouter(boss, sseClients, documentRepo, timelineRepo));
 
 export default {
   port: PORT,

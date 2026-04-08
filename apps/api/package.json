@@ -12,9 +12,9 @@
     "@blue-labs/language": "^3.9.2",
     "@blue-repository/types": "^0.25.0",
     "@types/pg": "^8.20.0",
-    "hono": "^4.12.10",
+    "hono": "^4.12.12",
     "pg": "^8.20.0",
-    "pg-boss": "^10.1.5",
+    "pg-boss": "^12.15.0",
     "radash": "12.1.1",
     "zod": "3"
   },

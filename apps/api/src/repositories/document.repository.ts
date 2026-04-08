@@ -17,7 +17,7 @@ export interface DocumentHistoryEntry {
   document_id: string;
   seq: number;
   event: Record<string, unknown>;
-  diff: Record<string, unknown> | null;
+  diff: Record<string, unknown>[] | null;
   created_at: Date;
 }
 
@@ -88,13 +88,13 @@ export class DocumentRepository {
   async appendHistory(
     documentId: string,
     event: Record<string, unknown>,
-    diff: Record<string, unknown> | null,
+    diff: Record<string, unknown>[] | null,
   ): Promise<DocumentHistoryEntry> {
     const { rows } = await this.pool.query<DocumentHistoryEntry>(
       `INSERT INTO document_history (document_id, seq, event, diff)
-       VALUES ($1, (SELECT COALESCE(MAX(seq), 0) + 1 FROM document_history WHERE document_id = $1), $2, $3)
+       VALUES ($1, (SELECT COALESCE(MAX(seq), 0) + 1 FROM document_history WHERE document_id = $1), $2, $3::jsonb[])
        RETURNING id, document_id, seq, event, diff, created_at`,
-      [documentId, event, diff],
+      [documentId, event, diff?.map((c) => JSON.stringify(c)) ?? null],
     );
     return rows[0];
   }

@@ -1,5 +1,5 @@
 import type { Pool } from "pg";
-import type PgBoss from "pg-boss";
+import type { PgBoss } from "pg-boss";
 import { notifyDocumentUpdated } from "../notify";
 
 interface ProcessEntryJob {
@@ -8,7 +8,8 @@ interface ProcessEntryJob {
   payload: Record<string, unknown>;
 }
 
-export function startTimelineWorker(boss: PgBoss, pool: Pool) {
+export async function startTimelineWorker(boss: PgBoss, pool: Pool) {
+  await boss.createQueue("process-entry");
   boss.work<ProcessEntryJob>("process-entry", async (job) => {
     const { timelineId, entryId, payload } = job.data;
     console.log(`[process-entry] timelineId=${timelineId} entryId=${entryId}`);

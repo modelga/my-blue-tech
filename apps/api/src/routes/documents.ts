@@ -3,7 +3,7 @@ import repository from "@blue-repository/types";
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { streamSSE } from "hono/streaming";
-import type PgBoss from "pg-boss";
+import type { PgBoss } from "pg-boss";
 import * as _ from "radash";
 import { blue } from "../lib/blue";
 import type { Variables } from "../lib/types";

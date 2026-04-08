@@ -1,12 +1,9 @@
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
-import type PgBoss from "pg-boss";
+import type { PgBoss } from "pg-boss";
 import type { Variables } from "../lib/types";
 
-export function sessionsRouter(
-  boss: PgBoss,
-  sseClients: Map<string, Set<(data: string) => void>>,
-) {
+export function sessionsRouter(boss: PgBoss, sseClients: Map<string, Set<(data: string) => void>>) {
   const app = new Hono<{ Variables: Variables }>();
 
   // ── Document Sessions ──────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-blue}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-blue}"]
       interval: 5s
@@ -113,7 +114,23 @@ services:
           path: ./apps/frontend/package.json
         - action: rebuild
           path: ./apps/frontend/bun.lock
-
+  dashboard:
+    image: node:24
+    working_dir: /app
+    command: sh -c "npm install -g @pg-boss/dashboard && pg-boss-dashboard"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-blue}:${POSTGRES_PASSWORD:-blue}@postgres:5432/${POSTGRES_DB:-blue}
+      PGBOSS_SCHEMA: pgboss
+      PORT: 3000
+    ports:
+      - "3010:3000"
+    networks:
+      - blue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      worker:
+        condition: service_started
 volumes:
   postgres_data:
   frontend_sqlite:

@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS document_history (
   document_id TEXT        NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   seq         INTEGER     NOT NULL,
   event       JSONB       NOT NULL,
-  diff        JSONB,
+  diff        JSONB[],
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (document_id, seq)
 );

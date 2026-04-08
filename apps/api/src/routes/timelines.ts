@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type PgBoss from "pg-boss";
+import type { PgBoss } from "pg-boss";
 import { blue } from "../lib/blue";
 import type { Variables } from "../lib/types";
 import type { TimelineRepository } from "../repositories/timeline.repository";
