@@ -2,21 +2,22 @@ import { expect, test } from "@playwright/test";
 import { loginAsTestUser } from "../helpers/login.js";
 
 const uid = Date.now();
-const timelineName = `E2E Entries ${uid}`;
+let seq = 0;
 
 test.describe("Timeline entries", () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
   });
 
-  /** Creates a timeline and navigates to its detail page. Returns the page URL. */
+  /** Creates a uniquely-named timeline and navigates to its detail page. */
   async function createTimelineAndOpen(page: Parameters<typeof loginAsTestUser>[0]) {
+    const name = `E2E Entries ${uid}-${++seq}`;
     await page.goto("/timelines/new");
-    await page.fill('input[name="name"]', timelineName);
+    await page.fill('input[name="name"]', name);
     await page.getByRole("button", { name: /create timeline/i }).click();
     await page.waitForURL("http://localhost:3000/timelines");
 
-    const card = page.locator("p", { hasText: timelineName }).locator("xpath=..");
+    const card = page.locator("p", { hasText: name }).locator("xpath=..");
     await card.getByRole("link", { name: /open/i }).click();
     await page.waitForURL(/\/timelines\/.+/);
   }

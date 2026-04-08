@@ -68,16 +68,16 @@ export default function NewDocumentPage() {
     }
 
     setError(null);
-    setPending(true);
+    // setPending(true);
 
     const res = await fetch("/api/documents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), document: parsed }),
+      body: JSON.stringify({ name: name.trim(), definition: parsed }),
     });
 
     if (res.ok) {
-      router.push("/documents");
+      // router.push("/documents");
     } else {
       const body = await res.json().catch(() => ({}));
       setError(body.error ?? "Failed to create document.");

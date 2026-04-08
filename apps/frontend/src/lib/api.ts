@@ -48,6 +48,21 @@ export async function getTimeline(id: string): Promise<Timeline> {
   return apiRequest<Timeline>(`/api/timelines/${id}`);
 }
 
+// ── Documents ─────────────────────────────────────────────────────────────────
+
+export interface Document {
+  id: string;
+  owner: string;
+  name: string;
+  created_at: string;
+  changes_count: number;
+}
+
+export async function getDocuments(): Promise<Document[]> {
+  const data = await apiRequest<{ documents: Document[] }>("/api/documents");
+  return data.documents;
+}
+
 // ── Timeline Entries ──────────────────────────────────────────────────────────
 
 export interface TimelineEntry {

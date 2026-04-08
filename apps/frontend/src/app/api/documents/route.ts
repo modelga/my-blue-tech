@@ -1,33 +1,34 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 
+const API_URL = process.env.API_URL ?? "http://localhost:3001";
+
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session) {
+  if (!session?.user?.name) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
-  console.log(session);
+
   const body = await req.json();
-  const { name, document } = body;
+  const { name, definition } = body;
 
   if (!name || typeof name !== "string" || name.trim().length === 0) {
     return NextResponse.json({ error: "Name is required." }, { status: 400 });
   }
 
-  if (!document || typeof document !== "object") {
-    return NextResponse.json(
-      { error: "Document payload is required." },
-      { status: 400 },
-    );
+  if (!definition || typeof definition !== "object") {
+    return NextResponse.json({ error: "Document payload is required." }, { status: 400 });
   }
 
-  // TODO: forward to backend API once available
-  // await fetch(`${process.env.API_URL}/documents`, { method: "POST", ... })
+  const res = await fetch(`${API_URL}/api/documents`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer user ${session.user.name}`,
+    },
+    body: JSON.stringify({ name: name.trim(), definition }),
+  });
 
-  console.log("[stub] Create document:", { name: name.trim(), document });
-
-  return NextResponse.json(
-    { ok: true, name: name.trim(), document },
-    { status: 201 },
-  );
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
 }

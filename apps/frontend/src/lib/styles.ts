@@ -424,6 +424,19 @@ export const cardActionButton: CSSProperties = {
   cursor: "pointer",
 };
 
+// ── Document list ─────────────────────────────────────────────────────────────
+
+export const docChangesBadge: CSSProperties = {
+  display: "inline-block",
+  padding: "0.15rem 0.5rem",
+  background: colors.pageBg,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.sm,
+  fontSize: "0.78rem",
+  color: colors.textBody,
+  fontWeight: 600,
+};
+
 // ── Timeline entry list ───────────────────────────────────────────────────────
 
 /** Vertical stack of entry rows. */

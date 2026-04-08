@@ -1,10 +1,13 @@
+import type { BlueNode } from "@blue-labs/language";
+import repository from "@blue-repository/types";
 import { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import type PgBoss from "pg-boss";
+import * as _ from "radash";
+import { blue } from "../lib/blue";
+import type { Variables } from "../lib/types";
 import type { DocumentRepository } from "../repositories/document.repository";
 import type { TimelineRepository } from "../repositories/timeline.repository";
-import type { Variables } from "../lib/types";
-
 export function documentsRouter(
   boss: PgBoss,
   sseClients: Map<string, Set<(data: string) => void>>,
@@ -18,27 +21,44 @@ export function documentsRouter(
   app.post("/", async (c) => {
     const owner = c.get("userName");
     const body = await c.req.json<{ name: string; definition: Record<string, unknown> }>();
+    let doc: BlueNode;
+    try {
+      doc = blue.jsonValueToNode(body.definition);
+      if (!doc) {
+        return c.json({ error: "Invalid Blue document: empty definition" }, 400);
+      }
+    } catch (err) {
+      return c.json({ error: `Invalid Blue document: ${(err as Error).message}` }, 400);
+    }
+
+    const contracts = _.listify(doc.getContracts() ?? {}, (key, value) => ({ contract: value, key }));
+
+    const validationResults = await _.map(
+      contracts,
+      _.tryit(async ({ contract, key }): Promise<false> => {
+        const isTimelineChannel = contract.getType()?.getBlueId() === repository.packages.myos.aliases["MyOS/MyOS Timeline Channel"];
+
+        if (isTimelineChannel) {
+          const timelineId = contract.getProperties()?.timelineId?.getValue();
+          const exists = await timelineRepo.findById(String(timelineId));
+
+          if (!exists) {
+            throw new Error(`Timeline with id="${timelineId}" not found for timeline channel contract="${key}"`);
+          }
+        }
+
+        return false;
+      }),
+    );
+
+    const errors = _.sift(validationResults.flat());
+
+    if (errors.length > 0) {
+      return c.json({ error: "Blue document contract validation error", details: errors }, 400);
+    }
     const documentId = crypto.randomUUID();
 
     const document = await documentRepo.create(documentId, owner, body.name, body.definition);
-
-    // Auto-create timelines for MyOS/MyOS Timeline Channel contracts
-    const contracts = body.definition?.contracts as Record<string, Record<string, unknown>> | undefined;
-    if (contracts) {
-      for (const [, contract] of Object.entries(contracts)) {
-        if (contract?.type === "MyOS/MyOS Timeline Channel" && typeof contract.timelineId === "string") {
-          const existingTimeline = await timelineRepo.findById(contract.timelineId);
-          if (!existingTimeline) {
-            await timelineRepo.create(
-              contract.timelineId,
-              owner,
-              `${body.name} — Timeline`,
-              `Auto-created timeline channel for document "${body.name}"`,
-            );
-          }
-        }
-      }
-    }
 
     await boss.send("initialize-document", { documentId, ...body });
     return c.json({ documentId: document.id }, 202);

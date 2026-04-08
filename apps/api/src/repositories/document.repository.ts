@@ -9,6 +9,7 @@ export interface Document {
   initialized: boolean;
   created_at: Date;
   updated_at: Date;
+  changes_count?: number;
 }
 
 export interface DocumentHistoryEntry {
@@ -25,7 +26,9 @@ export class DocumentRepository {
 
   async findByOwner(owner: string): Promise<Document[]> {
     const { rows } = await this.pool.query<Document>(
-      "SELECT id, owner, name, definition, state, initialized, created_at, updated_at FROM documents WHERE owner = $1 ORDER BY created_at DESC",
+      `SELECT d.id, d.owner, d.name, d.definition, d.state, d.initialized, d.created_at, d.updated_at,
+              (SELECT COUNT(*) FROM document_history dh WHERE dh.document_id = d.id)::int AS changes_count
+       FROM documents d WHERE d.owner = $1 ORDER BY d.created_at DESC`,
       [owner],
     );
     return rows;
