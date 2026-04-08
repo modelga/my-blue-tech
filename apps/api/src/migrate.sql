@@ -40,16 +40,6 @@ CREATE TABLE IF NOT EXISTS document_history (
   UNIQUE (document_id, seq)
 );
 
--- Idempotent rename: state_after → diff (for existing databases)
-DO $$ BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'document_history' AND column_name = 'state_after'
-  ) THEN
-    ALTER TABLE document_history RENAME COLUMN state_after TO diff;
-  END IF;
-END $$;
-
 -- Notify on document state changes (used by SSE fan-out)
 CREATE OR REPLACE FUNCTION notify_document_updated()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
