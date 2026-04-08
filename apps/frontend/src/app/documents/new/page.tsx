@@ -7,7 +7,7 @@ import { ErrorBanner } from "@/components/ErrorBanner";
 import { type Format, PayloadEditor } from "@/components/PayloadEditor";
 import { cancelButton, formActions, formBack, formCard, formInput, formLabel, formPageHeader, pageTitle, submitButton } from "@/lib/styles";
 
-const EXAMLE_DOCUMENT = `
+const EXAMPLE_DOCUMENT = `
   name: Counter
   counter: 0
   contracts:
@@ -49,14 +49,14 @@ const EXAMLE_DOCUMENT = `
 `;
 
 const EXAMPLES: Record<Format, string> = {
-  json: JSON.stringify(parseYaml(EXAMLE_DOCUMENT), null, 2),
-  yaml: EXAMLE_DOCUMENT,
+  json: JSON.stringify(parseYaml(EXAMPLE_DOCUMENT), null, 2),
+  yaml: EXAMPLE_DOCUMENT,
 };
 
 export default function NewDocumentPage() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [parsed, setParsed] = useState<unknown | null>(null);
+  const [parsed, setParsed] = useState<unknown | null>(parseYaml(EXAMPLE_DOCUMENT));
   const [parseError, setParseError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<unknown[]>([]);
@@ -71,7 +71,7 @@ export default function NewDocumentPage() {
 
     setError(null);
     setErrorDetails([]);
-    // setPending(true);
+    setPending(true);
 
     const res = await fetch("/api/documents", {
       method: "POST",
@@ -80,7 +80,7 @@ export default function NewDocumentPage() {
     });
 
     if (res.ok) {
-      // router.push("/documents");
+      router.push("/documents");
     } else {
       const body = await res.json().catch(() => ({}));
       setError(body.error ?? "Failed to create document.");
