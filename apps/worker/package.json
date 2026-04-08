@@ -4,13 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
+    "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts"
   },
   "dependencies": {
     "@blue-labs/document-processor": "latest",
     "@blue-labs/language": "latest",
     "@blue-repository/types": "latest",
+    "json-diff-ts": "4.10.4",
     "pg-boss": "^10.1.5",
     "pg": "^8.13.3"
   },

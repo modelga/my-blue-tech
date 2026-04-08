@@ -35,10 +35,20 @@ CREATE TABLE IF NOT EXISTS document_history (
   document_id TEXT        NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   seq         INTEGER     NOT NULL,
   event       JSONB       NOT NULL,
-  state_after JSONB,
+  diff        JSONB,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (document_id, seq)
 );
+
+-- Idempotent rename: state_after → diff (for existing databases)
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'document_history' AND column_name = 'state_after'
+  ) THEN
+    ALTER TABLE document_history RENAME COLUMN state_after TO diff;
+  END IF;
+END $$;
 
 -- Notify on document state changes (used by SSE fan-out)
 CREATE OR REPLACE FUNCTION notify_document_updated()

@@ -17,7 +17,7 @@ export interface DocumentHistoryEntry {
   document_id: string;
   seq: number;
   event: Record<string, unknown>;
-  state_after: Record<string, unknown> | null;
+  diff: Record<string, unknown> | null;
   created_at: Date;
 }
 
@@ -79,7 +79,7 @@ export class DocumentRepository {
 
   async getHistory(documentId: string): Promise<DocumentHistoryEntry[]> {
     const { rows } = await this.pool.query<DocumentHistoryEntry>(
-      "SELECT id, document_id, seq, event, state_after, created_at FROM document_history WHERE document_id = $1 ORDER BY seq ASC",
+      "SELECT id, document_id, seq, event, diff, created_at FROM document_history WHERE document_id = $1 ORDER BY seq ASC",
       [documentId],
     );
     return rows;
@@ -88,13 +88,13 @@ export class DocumentRepository {
   async appendHistory(
     documentId: string,
     event: Record<string, unknown>,
-    stateAfter: Record<string, unknown> | null,
+    diff: Record<string, unknown> | null,
   ): Promise<DocumentHistoryEntry> {
     const { rows } = await this.pool.query<DocumentHistoryEntry>(
-      `INSERT INTO document_history (document_id, seq, event, state_after)
+      `INSERT INTO document_history (document_id, seq, event, diff)
        VALUES ($1, (SELECT COALESCE(MAX(seq), 0) + 1 FROM document_history WHERE document_id = $1), $2, $3)
-       RETURNING id, document_id, seq, event, state_after, created_at`,
-      [documentId, event, stateAfter],
+       RETURNING id, document_id, seq, event, diff, created_at`,
+      [documentId, event, diff],
     );
     return rows[0];
   }

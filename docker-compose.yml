@@ -58,6 +58,7 @@ services:
     build:
       context: ./apps/worker
       dockerfile: Dockerfile
+      target: ${WORKER_TARGET:-production}
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-blue}:${POSTGRES_PASSWORD:-blue}@postgres:5432/${POSTGRES_DB:-blue}
@@ -68,6 +69,15 @@ services:
       replicas: 1 # increase for horizontal scale; pg-boss SKIP LOCKED handles concurrency
     networks:
       - blue
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./apps/worker/src
+          target: /app/src
+        - action: rebuild
+          path: ./apps/worker/package.json
+        - action: rebuild
+          path: ./apps/worker/bun.lock
 
   # ── Frontend ─────────────────────────────────────────────────────────────────
   frontend:
