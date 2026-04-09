@@ -1,69 +1,72 @@
-import type { JSONSchema7 } from "json-schema";
+import { z } from "zod";
 
 // ── Shared primitives ──────────────────────────────────────────────────────────
 
-export const UUIDSchema: JSONSchema7 = { type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440000" };
-export const TimestampSchema: JSONSchema7 = { type: "string", format: "date-time" };
-export const AnyObjectSchema: JSONSchema7 = { type: "object", additionalProperties: true };
-export const ErrorSchema: JSONSchema7 = {
-  type: "object",
-  required: ["error"],
-  properties: { error: { type: "string" } },
-};
+export const UUIDSchema = z.string().uuid();
+export const TimestampSchema = z.string().datetime();
+export const AnyObjectSchema = z.record(z.string(), z.unknown());
+export const ErrorSchema = z.object({ error: z.string() });
 
 // ── Timeline schemas ───────────────────────────────────────────────────────────
 
-export const TimelineSchema: JSONSchema7 = {
-  type: "object",
-  required: ["id", "owner", "name", "description", "created_at"],
-  properties: {
-    id: UUIDSchema,
-    owner: { type: "string" },
-    name: { type: "string" },
-    description: { type: "string" },
-    created_at: TimestampSchema,
-  },
-};
+export const TimelineSchema = z.object({
+  id: UUIDSchema,
+  owner: z.string(),
+  name: z.string(),
+  description: z.string(),
+  created_at: TimestampSchema,
+});
 
-export const TimelineEntrySchema: JSONSchema7 = {
-  type: "object",
-  required: ["id", "timeline_id", "seq", "payload", "created_at"],
-  properties: {
-    id: UUIDSchema,
-    timeline_id: UUIDSchema,
-    seq: { type: "integer", minimum: 1 },
-    payload: AnyObjectSchema,
-    created_at: TimestampSchema,
-  },
-};
+export const TimelineEntrySchema = z.object({
+  id: UUIDSchema,
+  timeline_id: UUIDSchema,
+  seq: z.number().int().min(1),
+  payload: AnyObjectSchema,
+  created_at: TimestampSchema,
+});
+
+// ── Timeline request body schemas ──────────────────────────────────────────────
+
+export const CreateTimelineBodySchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+});
+
+export const UpdateTimelineBodySchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+});
 
 // ── Document schemas ───────────────────────────────────────────────────────────
 
-export const DocumentSchema: JSONSchema7 = {
-  type: "object",
-  required: ["id", "owner", "name", "definition", "initialized", "created_at", "updated_at"],
-  properties: {
-    id: UUIDSchema,
-    owner: { type: "string" },
-    name: { type: "string" },
-    definition: AnyObjectSchema,
-    state: { oneOf: [AnyObjectSchema, { type: "null" }] },
-    initialized: { type: "boolean" },
-    changes_count: { type: "integer", minimum: 0 },
-    created_at: TimestampSchema,
-    updated_at: TimestampSchema,
-  },
-};
+export const DocumentSchema = z.object({
+  id: UUIDSchema,
+  owner: z.string(),
+  name: z.string(),
+  definition: AnyObjectSchema,
+  state: z.union([AnyObjectSchema, z.null()]).optional(),
+  initialized: z.boolean(),
+  changes_count: z.number().int().min(0).optional(),
+  created_at: TimestampSchema,
+  updated_at: TimestampSchema,
+});
 
-export const DocumentHistoryEntrySchema: JSONSchema7 = {
-  type: "object",
-  required: ["id", "document_id", "seq", "event", "created_at"],
-  properties: {
-    id: { type: "integer" },
-    document_id: UUIDSchema,
-    seq: { type: "integer", minimum: 1 },
-    event: AnyObjectSchema,
-    diff: { oneOf: [{ type: "array", items: AnyObjectSchema }, { type: "null" }] },
-    created_at: TimestampSchema,
-  },
-};
+export const DocumentHistoryEntrySchema = z.object({
+  id: z.number().int(),
+  document_id: UUIDSchema,
+  seq: z.number().int().min(1),
+  event: AnyObjectSchema,
+  diff: z.array(AnyObjectSchema).nullable().optional(),
+  created_at: TimestampSchema,
+});
+
+// ── Document request body schemas ──────────────────────────────────────────────
+
+export const CreateDocumentBodySchema = z.object({
+  name: z.string(),
+  definition: AnyObjectSchema,
+});
+
+// ── Path param schemas ─────────────────────────────────────────────────────────
+
+export const IDParamSchema = z.object({ id: z.string().uuid() });

@@ -1,10 +1,27 @@
 import { Hono } from "hono";
-import { describeRoute } from "hono-openapi";
+import { describeRoute, resolver, validator } from "hono-openapi";
 import type { PgBoss } from "pg-boss";
+import { z } from "zod";
 import { blue } from "../lib/blue";
-import { AnyObjectSchema, ErrorSchema, TimelineEntrySchema, TimelineSchema, UUIDSchema } from "../lib/schemas";
+import {
+  AnyObjectSchema,
+  CreateTimelineBodySchema,
+  ErrorSchema,
+  IDParamSchema,
+  TimelineEntrySchema,
+  TimelineSchema,
+  UpdateTimelineBodySchema,
+  UUIDSchema,
+} from "../lib/schemas";
 import type { Variables } from "../lib/types";
 import type { TimelineRepository } from "../repositories/timeline.repository";
+
+// biome-ignore lint/suspicious/noExplicitAny: generic hook used across multiple validator targets
+const validationHook = (result: any, c: any) => {
+  if (!result.success) {
+    return c.json({ error: (result.error as readonly { message: string }[]).map((i) => i.message).join("; ") }, 400 as const);
+  }
+};
 
 export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) {
   const app = new Hono<{ Variables: Variables }>();
@@ -22,10 +39,7 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
           description: "List of timelines",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: { timelines: { type: "array", items: TimelineSchema } },
-              },
+              schema: resolver(z.object({ timelines: z.array(TimelineSchema) })),
             },
           },
         },
@@ -46,25 +60,18 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
       requestBody: {
         required: true,
         content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              required: ["name"],
-              properties: {
-                name: { type: "string" },
-                description: { type: "string" },
-              },
-            },
-          },
+          // biome-ignore lint/suspicious/noExplicitAny: resolver() accepted at runtime but not in requestBody type
+          "application/json": { schema: resolver(CreateTimelineBodySchema) as any },
         },
       },
       responses: {
-        201: { description: "Created timeline", content: { "application/json": { schema: TimelineSchema } } },
+        201: { description: "Created timeline", content: { "application/json": { schema: resolver(TimelineSchema) } } },
       },
     }),
+    validator("json", CreateTimelineBodySchema, validationHook),
     async (c) => {
       const owner = c.get("userName");
-      const body = await c.req.json<{ name: string; description?: string }>();
+      const body = c.req.valid("json");
       const timeline = await timelineRepo.create(crypto.randomUUID(), owner, body.name, body.description ?? "");
       return c.json(timeline, 201);
     },
@@ -75,14 +82,16 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
     describeRoute({
       tags: ["Timelines"],
       summary: "Get a timeline",
-      parameters: [{ in: "path", name: "id", required: true, schema: UUIDSchema }],
+      parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }],
       responses: {
-        200: { description: "Timeline", content: { "application/json": { schema: TimelineSchema } } },
-        404: { description: "Not found", content: { "application/json": { schema: ErrorSchema } } },
+        200: { description: "Timeline", content: { "application/json": { schema: resolver(TimelineSchema) } } },
+        404: { description: "Not found", content: { "application/json": { schema: resolver(ErrorSchema) } } },
       },
     }),
+    validator("param", IDParamSchema, validationHook),
     async (c) => {
-      const timeline = await timelineRepo.findById(c.req.param("id"));
+      const { id } = c.req.valid("param");
+      const timeline = await timelineRepo.findById(id);
       if (!timeline) return c.json({ error: "Not found" }, 404);
       return c.json(timeline);
     },
@@ -93,30 +102,25 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
     describeRoute({
       tags: ["Timelines"],
       summary: "Update a timeline",
-      parameters: [{ in: "path", name: "id", required: true, schema: UUIDSchema }],
+      parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }],
       requestBody: {
         required: true,
         content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              required: ["name"],
-              properties: {
-                name: { type: "string" },
-                description: { type: "string" },
-              },
-            },
-          },
+          // biome-ignore lint/suspicious/noExplicitAny: resolver() accepted at runtime but not in requestBody type
+          "application/json": { schema: resolver(UpdateTimelineBodySchema) as any },
         },
       },
       responses: {
-        200: { description: "Updated timeline", content: { "application/json": { schema: TimelineSchema } } },
-        404: { description: "Not found", content: { "application/json": { schema: ErrorSchema } } },
+        200: { description: "Updated timeline", content: { "application/json": { schema: resolver(TimelineSchema) } } },
+        404: { description: "Not found", content: { "application/json": { schema: resolver(ErrorSchema) } } },
       },
     }),
+    validator("param", IDParamSchema, validationHook),
+    validator("json", UpdateTimelineBodySchema, validationHook),
     async (c) => {
-      const body = await c.req.json<{ name: string; description?: string }>();
-      const timeline = await timelineRepo.update(c.req.param("id"), body.name, body.description ?? "");
+      const { id } = c.req.valid("param");
+      const body = c.req.valid("json");
+      const timeline = await timelineRepo.update(id, body.name, body.description ?? "");
       if (!timeline) return c.json({ error: "Not found" }, 404);
       return c.json(timeline);
     },
@@ -127,23 +131,25 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
     describeRoute({
       tags: ["Timelines"],
       summary: "Delete a timeline",
-      parameters: [{ in: "path", name: "id", required: true, schema: UUIDSchema }],
+      parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }],
       responses: {
         200: {
           description: "Deleted",
           content: {
             "application/json": {
-              schema: { type: "object", properties: { deleted: UUIDSchema } },
+              schema: resolver(z.object({ deleted: UUIDSchema })),
             },
           },
         },
-        404: { description: "Not found", content: { "application/json": { schema: ErrorSchema } } },
+        404: { description: "Not found", content: { "application/json": { schema: resolver(ErrorSchema) } } },
       },
     }),
+    validator("param", IDParamSchema, validationHook),
     async (c) => {
-      const deleted = await timelineRepo.delete(c.req.param("id"));
+      const { id } = c.req.valid("param");
+      const deleted = await timelineRepo.delete(id);
       if (!deleted) return c.json({ error: "Not found" }, 404);
-      return c.json({ deleted: c.req.param("id") });
+      return c.json({ deleted: id });
     },
   );
 
@@ -154,27 +160,23 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
     describeRoute({
       tags: ["Timeline Entries"],
       summary: "List entries for a timeline",
-      parameters: [{ in: "path", name: "id", required: true, schema: UUIDSchema }],
+      parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }],
       responses: {
         200: {
           description: "Entries",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  timelineId: UUIDSchema,
-                  entries: { type: "array", items: TimelineEntrySchema },
-                },
-              },
+              schema: resolver(z.object({ timelineId: UUIDSchema, entries: z.array(TimelineEntrySchema) })),
             },
           },
         },
       },
     }),
+    validator("param", IDParamSchema, validationHook),
     async (c) => {
-      const entries = await timelineRepo.listEntries(c.req.param("id"));
-      return c.json({ timelineId: c.req.param("id"), entries });
+      const { id } = c.req.valid("param");
+      const entries = await timelineRepo.listEntries(id);
+      return c.json({ timelineId: id, entries });
     },
   );
 
@@ -185,19 +187,23 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
       summary: "Push an entry to a timeline",
       description:
         "Appends a Blue Language message to the timeline. The API wraps it in a `MyOS/MyOS Timeline Entry` envelope and dispatches a `process-entry` job to the worker.",
-      parameters: [{ in: "path", name: "id", required: true, schema: UUIDSchema }],
+      parameters: [{ in: "path", name: "id", required: true, schema: { type: "string", format: "uuid" } }],
       requestBody: {
         required: true,
         description: "A valid Blue Language message object (the inner message, not the full envelope).",
-        content: { "application/json": { schema: AnyObjectSchema } },
+        // biome-ignore lint/suspicious/noExplicitAny: resolver() accepted at runtime but not in requestBody type
+        content: { "application/json": { schema: resolver(AnyObjectSchema) as any } },
       },
       responses: {
-        201: { description: "Created entry", content: { "application/json": { schema: TimelineEntrySchema } } },
-        400: { description: "Invalid Blue payload", content: { "application/json": { schema: ErrorSchema } } },
+        201: { description: "Created entry", content: { "application/json": { schema: resolver(TimelineEntrySchema) } } },
+        400: { description: "Invalid Blue payload", content: { "application/json": { schema: resolver(ErrorSchema) } } },
       },
     }),
+    validator("param", IDParamSchema, validationHook),
+    validator("json", AnyObjectSchema, validationHook),
     async (c) => {
-      const message = await c.req.json<Record<string, unknown>>();
+      const { id: timelineId } = c.req.valid("param");
+      const message = c.req.valid("json");
 
       try {
         blue.jsonValueToNode(message);
@@ -206,7 +212,6 @@ export function timelinesRouter(boss: PgBoss, timelineRepo: TimelineRepository) 
       }
 
       const entryId = crypto.randomUUID();
-      const timelineId = c.req.param("id");
 
       const payload = {
         type: "MyOS/MyOS Timeline Entry",
