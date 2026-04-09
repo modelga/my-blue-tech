@@ -1,10 +1,6 @@
-import { DocumentProcessor } from "@blue-labs/document-processor";
-import { Blue } from "@blue-labs/language";
-import { repository } from "@blue-repository/types";
-import { diff } from "json-diff-ts";
 import type { Pool } from "pg";
 import type { PgBoss } from "pg-boss";
-import { notifyDocumentUpdated } from "../notify";
+import { DocumentEntryProcessor } from "../lib/process-document-entry";
 import { DocumentRepository } from "../repositories/document.repository";
 import { TimelineRepository } from "../repositories/timeline.repository";
 
@@ -13,8 +9,7 @@ interface ReplayDocumentTimelinesJob {
 }
 
 export async function startDocumentReplayWorker(boss: PgBoss, pool: Pool) {
-  const blue = new Blue({ repositories: [repository] });
-  const processor = new DocumentProcessor({ blue });
+  const entryProcessor = new DocumentEntryProcessor(pool, "[replay-document-timelines]");
   const documentRepo = new DocumentRepository(pool);
   const timelineRepo = new TimelineRepository(pool);
 
@@ -33,47 +28,14 @@ export async function startDocumentReplayWorker(boss: PgBoss, pool: Pool) {
     console.log(`[replay-document-timelines] doc=${documentId} replaying ${entries.length} entries in-process`);
 
     for (const entry of entries) {
-      const client = await pool.connect();
-      try {
-        await client.query("BEGIN");
-
-        const doc = await documentRepo.findByIdForUpdate(documentId, client);
-        if (!doc?.initialized) {
-          await client.query("ROLLBACK");
-          console.error(`[replay-document-timelines] doc=${documentId} not initialized, aborting replay`);
-          return;
-        }
-
-        const currentStateJson = doc.state ?? doc.definition;
-        const currentStateNode = blue.jsonValueToNode(currentStateJson);
-        const eventNode = blue.jsonValueToNode(entry.payload);
-
-        const result = await processor.processDocument(currentStateNode, eventNode);
-        if (result.capabilityFailure) {
-          await client.query("ROLLBACK");
-          console.error(`[replay-document-timelines] doc=${documentId} entry=${entry.id} capability failure: ${result.failureReason}`);
-          continue;
-        }
-
-        const updatedStateJson = blue.nodeToJson(result.document) as Record<string, unknown>;
-        const changeset = diff(currentStateJson, updatedStateJson);
-
-        const historyEntry = await documentRepo.appendHistory(
-          documentId,
-          entry.payload,
-          changeset as unknown as Record<string, unknown>[],
-          client,
-        );
-        await documentRepo.updateState(documentId, updatedStateJson, true, client);
-
-        await client.query("COMMIT");
-        await notifyDocumentUpdated(pool, documentId, historyEntry.seq, "entry_processed");
-        console.log(`[replay-document-timelines] doc=${documentId} entry=${entry.id} seq=${historyEntry.seq} done`);
-      } catch (err) {
-        await client.query("ROLLBACK");
-        throw err;
-      } finally {
-        client.release();
+      const applied = await entryProcessor.process(
+        documentId,
+        entry.id,
+        entry.payload,
+      );
+      if (!applied) {
+        console.error(`[replay-document-timelines] doc=${documentId} aborting replay at entry=${entry.id}`);
+        return;
       }
     }
 
