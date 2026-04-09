@@ -105,32 +105,42 @@ describe("Multi-document timeline synchronisation", () => {
         api.createDocument(`IT Beta ${uid}`, timelineId),
       ]);
 
-      // ── Step 2: Wait for both to initialise ──────────────────────────────
+      // ── Step 2: Wait for both to initialise (history count = 1) ──────────
       await Promise.all([waitForHistoryCount(doc1Id, 1), waitForHistoryCount(doc2Id, 1)]);
 
       // ── Step 3: Push first increment entry ───────────────────────────────
-      await api.pushIncrementEntry(timelineId, 1);
+      const entry1 = await api.pushIncrementEntry(timelineId, 1);
+      expect(entry1.seq).toBe(1);
 
+      // ── Step 4: Wait for both docs to process the first entry ────────────
+      // history count = 2: initialise + first entry
       await Promise.all([waitForHistoryCount(doc1Id, 2), waitForHistoryCount(doc2Id, 2)]);
 
+      // Verify counter reached 1 in both documents
       expect(await getCounter(doc1Id)).toBe(1);
       expect(await getCounter(doc2Id)).toBe(1);
 
-      // ── Step 4: Push second increment entry ──────────────────────────────
-      await api.pushIncrementEntry(timelineId, 1);
+      // ── Step 5: Push second increment entry ──────────────────────────────
+      const entry2 = await api.pushIncrementEntry(timelineId, 1);
+      expect(entry2.seq).toBe(2);
 
+      // ── Step 6: Wait for both docs to process the second entry ───────────
+      // history count = 3: initialise + two entries
       await Promise.all([waitForHistoryCount(doc1Id, 3), waitForHistoryCount(doc2Id, 3)]);
 
+      // Verify counter reached 2 in both documents
       expect(await getCounter(doc1Id)).toBe(2);
       expect(await getCounter(doc2Id)).toBe(2);
 
-      // ── Step 5: Create a third document after entries already exist ───────
+      // ── Step 7: Create a third document after entries already exist ───────
       const { documentId: doc3Id } = await api.createDocument(`IT Gamma ${uid}`, timelineId);
 
-      // The replay-document-timelines worker processes both past entries.
-      // Final history count: 1 (initialize) + 2 (replayed entries) = 3.
+      // ── Step 8: Wait for doc3 to initialise AND replay both past entries ──
+      // The replay-document-timelines worker processes both existing entries
+      // through processDocumentEntry, so the final history count is also 3.
       await waitForHistoryCount(doc3Id, 3, 120_000);
 
+      // Verify doc3 counter matches the other two — it caught up via replay
       expect(await getCounter(doc3Id)).toBe(2);
     },
     { timeout: 120_000 },
