@@ -131,6 +131,18 @@ services:
         condition: service_healthy
       worker:
         condition: service_started
+  # ── Adminer ──────────────────────────────────────────────────────────────────
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - blue
+
 volumes:
   postgres_data:
   frontend_sqlite:
