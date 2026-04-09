@@ -1,5 +1,5 @@
+import type { IChange } from "json-diff-ts";
 import type { Pool, PoolClient } from "pg";
-
 export interface DocumentHistoryEntry {
   id: number;
   document_id: string;
@@ -55,12 +55,7 @@ export class DocumentRepository {
     await db.query("UPDATE documents SET state = $1, initialized = $2, updated_at = NOW() WHERE id = $3", [state, initialized, id]);
   }
 
-  async appendHistory(
-    documentId: string,
-    event: Record<string, unknown>,
-    diff: Record<string, unknown>[] | null,
-    client?: PoolClient,
-  ): Promise<DocumentHistoryEntry> {
+  async appendHistory(documentId: string, event: Record<string, unknown>, diff: IChange[] | null, client?: PoolClient): Promise<DocumentHistoryEntry> {
     const db = client ?? this.pool;
     const { rows } = await db.query<DocumentHistoryEntry>(
       `INSERT INTO document_history (document_id, seq, event, diff)

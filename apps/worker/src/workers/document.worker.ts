@@ -37,7 +37,7 @@ export async function startDocumentWorker(boss: PgBoss, pool: Pool) {
 
     // Compute the changeset: records what initialization added to the document.
     const changeset = diff(definitionJson, initializedJson);
-    const entry = await documentRepo.appendHistory(documentId, { type: "initialize", documentId }, changeset as Record<string, unknown>);
+    const entry = await documentRepo.appendHistory(documentId, { type: "initialize", documentId }, changeset);
 
     await documentRepo.updateState(documentId, initializedJson, true);
 

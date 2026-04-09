@@ -50,7 +50,7 @@ describe("Document initialization", () => {
     expect(doc.initialized).toBe(true);
     expect(doc.state).not.toBeNull();
     expect(history).toHaveLength(1);
-    expect(history[0].event).toMatchObject({ type: "initialize" });
+    expect(history[0]?.event).toMatchObject({ type: "initialize" });
   });
 
   test("initial counter value is 0", async () => {

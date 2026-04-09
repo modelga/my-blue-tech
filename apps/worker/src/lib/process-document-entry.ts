@@ -55,7 +55,7 @@ export class DocumentEntryProcessor {
       const updatedStateJson = this.blue.nodeToJson(result.document) as Record<string, unknown>;
       const changeset = diff(currentStateJson, updatedStateJson);
 
-      const historyEntry = await this.documentRepo.appendHistory(documentId, payload, changeset as unknown as Record<string, unknown>[], client);
+      const historyEntry = await this.documentRepo.appendHistory(documentId, payload, changeset, client);
       await this.documentRepo.updateState(documentId, updatedStateJson, true, client);
 
       await client.query("COMMIT");
