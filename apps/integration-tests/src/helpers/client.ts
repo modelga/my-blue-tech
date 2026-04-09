@@ -117,6 +117,7 @@ function counterDefinition(timelineId: string): Record<string, unknown> {
               {
                 op: "replace",
                 path: "/counter",
+                // biome-ignore lint/suspicious/noTemplateCurlyInString: Blue Language expression — not a JS template literal
                 val: "${event.message.request + document('/counter')}",
               },
             ],

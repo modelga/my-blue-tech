@@ -17,6 +17,7 @@ export function ErrorBanner({ error, details }: { error: string; details?: unkno
       {items.length > 0 && (
         <ul style={errorDetailList}>
           {items.map((d, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: error detail items have no stable id; index is safe here because the list is static per render
             <li key={i}>{stringify(d)}</li>
           ))}
         </ul>

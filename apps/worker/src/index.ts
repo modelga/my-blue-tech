@@ -5,6 +5,7 @@ import { startDocumentReplayWorker } from "./workers/document-replay.worker";
 import { startDocumentSessionWorker } from "./workers/document-session.worker";
 import { startTimelineWorker } from "./workers/timeline.worker";
 
+// biome-ignore lint/style/noNonNullAssertion: required env var — container startup fails fast if absent
 const DATABASE_URL = process.env.DATABASE_URL!;
 
 const pool = new Pool({ connectionString: DATABASE_URL, min: 2, max: 4 });

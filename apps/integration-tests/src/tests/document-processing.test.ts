@@ -29,7 +29,7 @@ async function waitForInitialized(documentId: string): Promise<void> {
 
 async function getCounter(documentId: string): Promise<number> {
   const doc = await api.getDocument(documentId);
-  return (doc.state as Record<string, any>)?.counter?.value as number;
+  return (doc.state as Record<string, unknown> | null)?.counter as number;
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────────

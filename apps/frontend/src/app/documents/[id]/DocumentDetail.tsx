@@ -68,6 +68,7 @@ function DiffLog({ changes }: { changes: IChange[] }) {
   function renderChange(change: IChange, path = ""): React.ReactNode {
     const fullKey = path ? `${path}.${change.key}` : change.key;
     if (change.changes?.length) {
+      // biome-ignore lint/suspicious/noArrayIndexKey: diff entries have no stable id; index is safe here because the array is derived from an immutable changeset
       return change.changes.map((c, i) => <span key={i}>{renderChange(c, fullKey)}</span>);
     }
     if (change.type === "ADD") {
@@ -102,6 +103,7 @@ function DiffLog({ changes }: { changes: IChange[] }) {
   return (
     <div>
       {changes.map((c, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: diff entries have no stable id; index is safe here because the array is derived from an immutable changeset
         <span key={i}>{renderChange(c)}</span>
       ))}
     </div>
@@ -143,7 +145,7 @@ export function DocumentDetail({ document: initialDocument, history: initialHist
         return freshHistory;
       });
     })();
-  }, [debouncedSseSignal]);
+  }, [debouncedSseSignal, initialDocument.id]);
 
   // snapshots[0] = definition, snapshots[i+1] = state after history[i]
   const snapshots = buildSnapshots(document.definition, history);

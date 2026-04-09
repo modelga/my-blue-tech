@@ -62,7 +62,9 @@ test.describe("Multi-document timeline synchronisation", () => {
     expect(timelineId).toMatch(/^[0-9a-f-]{36}$/);
 
     // ── Step 2: Create two counter documents subscribed to the timeline ──
+    // biome-ignore lint/style/noNonNullAssertion: test assertion — timelineId is verified non-null by the expect above
     await createCounterDoc(page, doc1Name, timelineId!);
+    // biome-ignore lint/style/noNonNullAssertion: test assertion — timelineId is verified non-null by the expect above
     await createCounterDoc(page, doc2Name, timelineId!);
 
     // ── Step 3: Wait for both to initialise (changes_count = 1) ──────────
@@ -70,6 +72,7 @@ test.describe("Multi-document timeline synchronisation", () => {
     await waitForChangesCount(page, doc2Name, 1);
 
     // ── Step 4: Push first increment entry ────────────────────────────────
+    // biome-ignore lint/style/noNonNullAssertion: test assertion — timelineId is verified non-null by the expect above
     await pushIncrementEntry(page, timelineId!, 1);
     await expect(page.locator("span", { hasText: "#1" })).toBeVisible();
 
@@ -83,6 +86,7 @@ test.describe("Multi-document timeline synchronisation", () => {
     await checkCounterValue(page, doc2Name, 1);
 
     // ── Step 6: Push second increment entry ───────────────────────────────
+    // biome-ignore lint/style/noNonNullAssertion: test assertion — timelineId is verified non-null by the expect above
     await pushIncrementEntry(page, timelineId!, 1);
     await expect(page.locator("span", { hasText: "#2" })).toBeVisible();
 
@@ -96,6 +100,7 @@ test.describe("Multi-document timeline synchronisation", () => {
     await checkCounterValue(page, doc2Name, 2);
 
     // ── Step 8: Create a third document subscribed to the same timeline ───
+    // biome-ignore lint/style/noNonNullAssertion: test assertion — timelineId is verified non-null by the expect above
     await createCounterDoc(page, doc3Name, timelineId!);
 
     // ── Step 9: Wait for doc3 to initialise AND replay both past entries ──

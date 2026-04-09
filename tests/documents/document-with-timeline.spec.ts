@@ -31,6 +31,7 @@ test.describe("Document linked to a timeline", () => {
     // ── Step 4: substitute {{ timelineId }} in the pre-filled payload ────────
     const textarea = page.locator("textarea");
     const raw = await textarea.inputValue();
+    // biome-ignore lint/style/noNonNullAssertion: test assertion — timelineId is verified non-null by the expect above
     const substituted = raw.replace("{{ timelineId }}", timelineId!);
     await textarea.fill(substituted);
 

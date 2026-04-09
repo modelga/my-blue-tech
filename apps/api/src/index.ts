@@ -8,6 +8,7 @@ import { TimelineRepository } from "./repositories/timeline.repository";
 import { documentsRouter } from "./routes/documents";
 import { timelinesRouter } from "./routes/timelines";
 
+// biome-ignore lint/style/noNonNullAssertion: required env var — container startup fails fast if absent
 const DATABASE_URL = process.env.DATABASE_URL!;
 const PORT = Number(process.env.PORT ?? 3001);
 

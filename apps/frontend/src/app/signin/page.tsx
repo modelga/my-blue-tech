@@ -25,7 +25,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
                 password: formData.get("password"),
                 redirectTo: callbackUrl ?? "/",
               });
-            } catch (e) {
+            } catch {
               redirect("/signin?error=CredentialsSignin", RedirectType.replace);
             }
           }}
