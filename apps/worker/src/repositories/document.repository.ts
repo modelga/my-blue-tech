@@ -1,4 +1,4 @@
-import type { Pool } from "pg";
+import type { Pool, PoolClient } from "pg";
 
 export interface DocumentHistoryEntry {
   id: number;
@@ -42,12 +42,19 @@ export class DocumentRepository {
     return rows[0] ?? null;
   }
 
-  async updateState(id: string, state: Record<string, unknown>, initialized: boolean): Promise<void> {
-    await this.pool.query("UPDATE documents SET state = $1, initialized = $2, updated_at = NOW() WHERE id = $3", [state, initialized, id]);
+  async findByIdForUpdate(id: string, client: PoolClient): Promise<{ definition: Record<string, unknown>; state: Record<string, unknown> | null; initialized: boolean } | null> {
+    const { rows } = await client.query("SELECT definition, state, initialized FROM documents WHERE id = $1 FOR UPDATE", [id]);
+    return rows[0] ?? null;
   }
 
-  async appendHistory(documentId: string, event: Record<string, unknown>, diff: Record<string, unknown>[] | null): Promise<DocumentHistoryEntry> {
-    const { rows } = await this.pool.query<DocumentHistoryEntry>(
+  async updateState(id: string, state: Record<string, unknown>, initialized: boolean, client?: PoolClient): Promise<void> {
+    const db = client ?? this.pool;
+    await db.query("UPDATE documents SET state = $1, initialized = $2, updated_at = NOW() WHERE id = $3", [state, initialized, id]);
+  }
+
+  async appendHistory(documentId: string, event: Record<string, unknown>, diff: Record<string, unknown>[] | null, client?: PoolClient): Promise<DocumentHistoryEntry> {
+    const db = client ?? this.pool;
+    const { rows } = await db.query<DocumentHistoryEntry>(
       `INSERT INTO document_history (document_id, seq, event, diff)
        VALUES ($1, (SELECT COALESCE(MAX(seq), 0) + 1 FROM document_history WHERE document_id = $1), $2, $3::jsonb[])
        RETURNING id, document_id, seq, event, diff, created_at`,

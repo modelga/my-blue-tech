@@ -11,7 +11,7 @@ interface ProcessEntryJob {
 export async function startTimelineWorker(boss: PgBoss, pool: Pool) {
   const documentRepo = new DocumentRepository(pool);
 
-  await boss.createQueue("process-entry");
+  await boss.createQueue("process-entry", { retryDelay: 5, retryLimit: 10 });
   boss.work<ProcessEntryJob>("process-entry", async ([job]) => {
     const { timelineId, entryId, payload } = job.data;
 
@@ -24,7 +24,7 @@ export async function startTimelineWorker(boss: PgBoss, pool: Pool) {
         { documentId: doc.id, entryId, timelineId, payload },
         // singletonKey ensures at most one queued job per document at a time,
         // preventing concurrent mutations of the same document state.
-        { singletonKey: doc.id },
+        { singletonKey: doc.id, singletonNextSlot: true },
       );
       console.log(`[process-entry] queued process-entry-document for doc=${doc.id}`);
     }
