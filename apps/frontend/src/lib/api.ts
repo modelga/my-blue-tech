@@ -84,9 +84,7 @@ export async function getDocument(id: string): Promise<DocumentDetail> {
 }
 
 export async function getDocumentHistory(id: string): Promise<DocumentHistoryEntry[]> {
-  const data = await apiRequest<{ documentId: string; history: DocumentHistoryEntry[] }>(
-    `/api/documents/${id}/history`,
-  );
+  const data = await apiRequest<{ documentId: string; history: DocumentHistoryEntry[] }>(`/api/documents/${id}/history`);
   return data.history;
 }
 
@@ -101,16 +99,11 @@ export interface TimelineEntry {
 }
 
 export async function getTimelineEntries(timelineId: string): Promise<TimelineEntry[]> {
-  const data = await apiRequest<{ timelineId: string; entries: TimelineEntry[] }>(
-    `/api/timelines/${timelineId}/entries`,
-  );
+  const data = await apiRequest<{ timelineId: string; entries: TimelineEntry[] }>(`/api/timelines/${timelineId}/entries`);
   return data.entries;
 }
 
-export async function pushTimelineEntry(
-  timelineId: string,
-  payload: Record<string, unknown>,
-): Promise<TimelineEntry> {
+export async function pushTimelineEntry(timelineId: string, payload: Record<string, unknown>): Promise<TimelineEntry> {
   return apiRequest<TimelineEntry>(`/api/timelines/${timelineId}/entries`, {
     method: "POST",
     body: JSON.stringify(payload),

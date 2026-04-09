@@ -9,14 +9,10 @@ test.describe("Login flow", () => {
     await expect(page.locator('input[name="username"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
     await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
-    await expect(
-      page.getByRole("main").getByRole("link", { name: /register/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("main").getByRole("link", { name: /register/i })).toBeVisible();
   });
 
-  test("valid credentials redirect to dashboard with active session", async ({
-    page,
-  }) => {
+  test("valid credentials redirect to dashboard with active session", async ({ page }) => {
     await page.goto("/signin");
 
     await page.fill('input[name="username"]', LOGIN_TEST_USER.username);
@@ -24,9 +20,7 @@ test.describe("Login flow", () => {
     await page.getByRole("button", { name: /sign in/i }).click();
 
     await expect(page).toHaveURL("http://localhost:3000/");
-    await expect(
-      page.getByText(new RegExp(`welcome.*${LOGIN_TEST_USER.username}`, "i")),
-    ).toBeVisible();
+    await expect(page.getByText(new RegExp(`welcome.*${LOGIN_TEST_USER.username}`, "i"))).toBeVisible();
     await expect(page.getByRole("button", { name: /sign out/i })).toBeVisible();
   });
 
@@ -53,8 +47,6 @@ test.describe("Login flow", () => {
     await page.getByRole("button", { name: /sign out/i }).click();
 
     await expect(page).toHaveURL(/\/signin/);
-    await expect(
-      page.getByRole("button", { name: /sign out/i }),
-    ).not.toBeVisible();
+    await expect(page.getByRole("button", { name: /sign out/i })).not.toBeVisible();
   });
 });

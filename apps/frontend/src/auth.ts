@@ -15,10 +15,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = stmtFindByUserName().get(credentials.username as string);
         if (!user) return null;
 
-        const valid = await Bun.password.verify(
-          credentials.password as string,
-          user.password_hash,
-        );
+        const valid = await Bun.password.verify(credentials.password as string, user.password_hash);
         if (!valid) return null;
 
         return { id: String(user.id), name: user.username, email: null };

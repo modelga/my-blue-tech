@@ -20,10 +20,7 @@ export default async function DashboardPage() {
     return (
       <div style={heroSection}>
         <h2 style={heroTitle}>MyOS-like Document Session Dashboard</h2>
-        <p style={heroSubtitle}>
-          Process Blue Documents deterministically via Timelines and Document
-          Sessions.
-        </p>
+        <p style={heroSubtitle}>Process Blue Documents deterministically via Timelines and Document Sessions.</p>
         <div style={heroActions}>
           <a href="/signin" style={heroPrimaryButton}>
             Sign in
@@ -38,25 +35,17 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h2 style={pageTitle}>
-        Welcome, {session.user?.name ?? session.user?.email}
-      </h2>
+      <h2 style={pageTitle}>Welcome, {session.user?.name ?? session.user?.email}</h2>
 
       <div style={dashGrid}>
         <a href="/timelines" style={dashCard}>
           <h3 style={dashCardTitle}>Timelines</h3>
-          <p style={dashCardBody}>
-            Create and manage event timelines. Add entries to drive Document
-            Sessions.
-          </p>
+          <p style={dashCardBody}>Create and manage event timelines. Add entries to drive Document Sessions.</p>
         </a>
 
         <a href="/documents" style={dashCard}>
           <h3 style={dashCardTitle}>Manage Documents</h3>
-          <p style={dashCardBody}>
-            View and manage your Documents. See how timelines have affected
-            them.
-          </p>
+          <p style={dashCardBody}>View and manage your Documents. See how timelines have affected them.</p>
         </a>
       </div>
     </div>

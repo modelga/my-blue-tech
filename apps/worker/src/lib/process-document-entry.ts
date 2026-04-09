@@ -11,8 +11,9 @@ export class DocumentEntryProcessor {
   private readonly processor: DocumentProcessor;
   private readonly documentRepo: DocumentRepository;
 
-  constructor(private readonly pool: Pool,
-   private readonly logPrefix: string,
+  constructor(
+    private readonly pool: Pool,
+    private readonly logPrefix: string,
   ) {
     this.blue = new Blue({ repositories: [repository] });
     this.processor = new DocumentProcessor({ blue: this.blue });
@@ -27,11 +28,7 @@ export class DocumentEntryProcessor {
    * Returns true if the entry was applied, false if the document was not found
    * or not yet initialized (caller may choose to skip or abort).
    */
-  async process(
-    documentId: string,
-    entryId: string,
-    payload: Record<string, unknown>,
-  ): Promise<boolean> {
+  async process(documentId: string, entryId: string, payload: Record<string, unknown>): Promise<boolean> {
     const client = await this.pool.connect();
     let seq: number;
     try {
@@ -58,12 +55,7 @@ export class DocumentEntryProcessor {
       const updatedStateJson = this.blue.nodeToJson(result.document) as Record<string, unknown>;
       const changeset = diff(currentStateJson, updatedStateJson);
 
-      const historyEntry = await this.documentRepo.appendHistory(
-        documentId,
-        payload,
-        changeset as unknown as Record<string, unknown>[],
-        client,
-      );
+      const historyEntry = await this.documentRepo.appendHistory(documentId, payload, changeset as unknown as Record<string, unknown>[], client);
       await this.documentRepo.updateState(documentId, updatedStateJson, true, client);
 
       await client.query("COMMIT");

@@ -1,5 +1,5 @@
-import { auth } from "@/auth";
 import type { NextRequest } from "next/server";
+import { auth } from "@/auth";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3001";
 

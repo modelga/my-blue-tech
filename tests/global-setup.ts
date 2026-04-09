@@ -14,10 +14,7 @@ export default async function globalSetup(_config: FullConfig) {
   console.log("[setup] Done.\n");
 }
 
-async function ensureUser(user: {
-  username: string;
-  password: string;
-}): Promise<void> {
+async function ensureUser(user: { username: string; password: string }): Promise<void> {
   const res = await fetch(`${FRONTEND_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

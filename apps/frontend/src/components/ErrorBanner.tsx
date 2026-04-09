@@ -8,13 +8,7 @@ function stringify(detail: unknown): string {
   return JSON.stringify(detail);
 }
 
-export function ErrorBanner({
-  error,
-  details,
-}: {
-  error: string;
-  details?: unknown[];
-}) {
+export function ErrorBanner({ error, details }: { error: string; details?: unknown[] }) {
   const items = details?.filter((d) => d !== null && d !== undefined) ?? [];
 
   return (

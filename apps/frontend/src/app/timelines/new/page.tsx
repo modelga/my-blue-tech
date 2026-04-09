@@ -59,34 +59,19 @@ export default function NewTimelinePage() {
 
         <label style={formLabel}>
           Name
-          <input
-            name="name"
-            type="text"
-            placeholder="e.g. Product Launch Events"
-            required
-            style={formInput}
-          />
+          <input name="name" type="text" placeholder="e.g. Product Launch Events" required style={formInput} />
         </label>
 
         <label style={formLabel}>
           Description
-          <textarea
-            name="description"
-            placeholder="Optional description…"
-            rows={4}
-            style={formTextarea}
-          />
+          <textarea name="description" placeholder="Optional description…" rows={4} style={formTextarea} />
         </label>
 
         <div style={formActions}>
           <a href="/timelines" style={cancelButton}>
             Cancel
           </a>
-          <button
-            type="submit"
-            disabled={pending}
-            style={{ ...submitButton, opacity: pending ? 0.7 : 1 }}
-          >
+          <button type="submit" disabled={pending} style={{ ...submitButton, opacity: pending ? 0.7 : 1 }}>
             {pending ? "Creating…" : "Create Timeline"}
           </button>
         </div>

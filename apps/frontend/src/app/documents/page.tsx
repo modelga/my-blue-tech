@@ -37,9 +37,7 @@ export default async function DocumentsPage() {
             <div key={doc.id} style={{ ...dashCard, display: "flex", alignItems: "center", gap: "1.5rem" }}>
               <p style={{ ...dashCardTitle, flex: "1 1 0", minWidth: 0, margin: 0 }}>{doc.name}</p>
               <p style={{ ...cardIdText, flex: "2 1 0", minWidth: 0, margin: 0 }}>{doc.id}</p>
-              <p style={{ ...cardMeta, flex: "0 0 auto", margin: 0 }}>
-                {new Date(doc.created_at).toLocaleString()}
-              </p>
+              <p style={{ ...cardMeta, flex: "0 0 auto", margin: 0 }}>{new Date(doc.created_at).toLocaleString()}</p>
               <p style={{ ...cardMeta, flex: "0 0 auto", margin: 0 }}>
                 <span style={docChangesBadge}>{doc.changes_count}</span>
                 {" changes"}

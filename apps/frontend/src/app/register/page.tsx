@@ -2,17 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  authCard,
-  authDividerText,
-  authInput,
-  authLink,
-  authPrimaryButton,
-  authSubtitle,
-  authTitle,
-  authWrapper,
-  errorBanner,
-} from "@/lib/styles";
+import { authCard, authDividerText, authInput, authLink, authPrimaryButton, authSubtitle, authTitle, authWrapper, errorBanner } from "@/lib/styles";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -59,33 +49,10 @@ export default function RegisterPage() {
         {error && <p style={errorBanner}>{error}</p>}
 
         <form onSubmit={handleSubmit}>
-          <input
-            name="username"
-            type="text"
-            placeholder="Username"
-            required
-            style={authInput}
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            required
-            minLength={8}
-            style={authInput}
-          />
-          <input
-            name="confirm"
-            type="password"
-            placeholder="Confirm password"
-            required
-            style={authInput}
-          />
-          <button
-            type="submit"
-            disabled={pending}
-            style={{ ...authPrimaryButton, opacity: pending ? 0.7 : 1 }}
-          >
+          <input name="username" type="text" placeholder="Username" required style={authInput} />
+          <input name="password" type="password" placeholder="Password" required minLength={8} style={authInput} />
+          <input name="confirm" type="password" placeholder="Confirm password" required style={authInput} />
+          <button type="submit" disabled={pending} style={{ ...authPrimaryButton, opacity: pending ? 0.7 : 1 }}>
             {pending ? "Creating account…" : "Create account"}
           </button>
         </form>

@@ -28,19 +28,11 @@ export class TimelineRepository {
   }
 
   async findById(id: string): Promise<Timeline | null> {
-    const { rows } = await this.pool.query<Timeline>(
-      "SELECT id, owner, name, description, created_at FROM timelines WHERE id = $1",
-      [id],
-    );
+    const { rows } = await this.pool.query<Timeline>("SELECT id, owner, name, description, created_at FROM timelines WHERE id = $1", [id]);
     return rows[0] ?? null;
   }
 
-  async create(
-    id: string,
-    owner: string,
-    name: string,
-    description: string = "",
-  ): Promise<Timeline> {
+  async create(id: string, owner: string, name: string, description: string = ""): Promise<Timeline> {
     const { rows } = await this.pool.query<Timeline>(
       "INSERT INTO timelines (id, owner, name, description) VALUES ($1, $2, $3, $4) RETURNING id, owner, name, description, created_at",
       [id, owner, name, description],
@@ -57,10 +49,7 @@ export class TimelineRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const { rowCount } = await this.pool.query(
-      "DELETE FROM timelines WHERE id = $1",
-      [id],
-    );
+    const { rowCount } = await this.pool.query("DELETE FROM timelines WHERE id = $1", [id]);
     return (rowCount ?? 0) > 0;
   }
 
@@ -74,11 +63,7 @@ export class TimelineRepository {
     return rows;
   }
 
-  async appendEntry(
-    id: string,
-    timelineId: string,
-    payload: Record<string, unknown>,
-  ): Promise<TimelineEntry> {
+  async appendEntry(id: string, timelineId: string, payload: Record<string, unknown>): Promise<TimelineEntry> {
     const { rows } = await this.pool.query<TimelineEntry>(
       `INSERT INTO timeline_entries (id, timeline_id, seq, payload)
        VALUES ($1, $2, (SELECT COALESCE(MAX(seq), 0) + 1 FROM timeline_entries WHERE timeline_id = $2), $3)

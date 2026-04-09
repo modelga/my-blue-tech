@@ -8,23 +8,15 @@ const testUser = {
 };
 
 test.describe("Registration flow", () => {
-  test("register page renders with username/password form", async ({
-    page,
-  }) => {
+  test("register page renders with username/password form", async ({ page }) => {
     await page.goto("/register");
 
-    await expect(
-      page.getByRole("heading", { name: /create an account/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /create an account/i })).toBeVisible();
     await expect(page.locator('input[name="username"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
     await expect(page.locator('input[name="confirm"]')).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /create account/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("main").getByRole("link", { name: /sign in/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /create account/i })).toBeVisible();
+    await expect(page.getByRole("main").getByRole("link", { name: /sign in/i })).toBeVisible();
   });
 
   test("successful registration redirects to sign-in", async ({ page }) => {

@@ -1,10 +1,10 @@
 "use client";
 
-import { dump } from "js-yaml";
 import { useDebounce } from "@uidotdev/usehooks";
+import { dump } from "js-yaml";
 import { useEffect, useRef, useState } from "react";
-import { getDocument, getDocumentHistory } from "@/lib/api";
 import type { DocumentDetail as DocumentDetailType, DocumentHistoryEntry } from "@/lib/api";
+import { getDocument, getDocumentHistory } from "@/lib/api";
 import {
   colors,
   detailSection,
@@ -132,10 +132,7 @@ export function DocumentDetail({ document: initialDocument, history: initialHist
   useEffect(() => {
     if (debouncedSseSignal === 0) return;
     (async () => {
-      const [freshDoc, freshHistory] = await Promise.all([
-        getDocument(initialDocument.id),
-        getDocumentHistory(initialDocument.id),
-      ]);
+      const [freshDoc, freshHistory] = await Promise.all([getDocument(initialDocument.id), getDocumentHistory(initialDocument.id)]);
       setDocument(freshDoc);
       setHistory((prev) => {
         // Auto-advance to the new latest entry only if the user was already there.

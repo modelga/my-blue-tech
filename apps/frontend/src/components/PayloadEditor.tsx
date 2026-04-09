@@ -20,10 +20,7 @@ const DEFAULT_EXAMPLES: Record<Format, string> = {
   yaml: "{}\n",
 };
 
-export function parsePayload(
-  value: string,
-  format: Format,
-): { ok: true; data: unknown } | { ok: false; error: string } {
+export function parsePayload(value: string, format: Format): { ok: true; data: unknown } | { ok: false; error: string } {
   try {
     const data = format === "json" ? JSON.parse(value) : parseYaml(value);
     return { ok: true, data };
@@ -42,22 +39,13 @@ interface PayloadEditorProps {
   onChange: (raw: string, parsed: unknown | null, error: string | null) => void;
 }
 
-export function PayloadEditor({
-  label,
-  defaultValue,
-  defaultFormat = "json",
-  examples = DEFAULT_EXAMPLES,
-  rows = 16,
-  onChange,
-}: PayloadEditorProps) {
+export function PayloadEditor({ label, defaultValue, defaultFormat = "json", examples = DEFAULT_EXAMPLES, rows = 16, onChange }: PayloadEditorProps) {
   const initial = defaultValue ?? examples[defaultFormat];
   const initialResult = parsePayload(initial, defaultFormat);
 
   const [format, setFormat] = useState<Format>(defaultFormat);
   const [value, setValue] = useState(initial);
-  const [parseError, setParseError] = useState<string | null>(
-    initialResult.ok ? null : initialResult.error,
-  );
+  const [parseError, setParseError] = useState<string | null>(initialResult.ok ? null : initialResult.error);
 
   function handleValueChange(next: string) {
     setValue(next);
@@ -72,10 +60,7 @@ export function PayloadEditor({
     const result = parsePayload(value, format);
     let nextValue: string;
     if (result.ok) {
-      nextValue =
-        next === "json"
-          ? JSON.stringify(result.data, null, 2)
-          : dumpYaml(result.data as object, { indent: 2 });
+      nextValue = next === "json" ? JSON.stringify(result.data, null, 2) : dumpYaml(result.data as object, { indent: 2 });
     } else {
       nextValue = examples[next];
     }

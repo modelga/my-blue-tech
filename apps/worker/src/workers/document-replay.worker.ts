@@ -28,11 +28,7 @@ export async function startDocumentReplayWorker(boss: PgBoss, pool: Pool) {
     console.log(`[replay-document-timelines] doc=${documentId} replaying ${entries.length} entries in-process`);
 
     for (const entry of entries) {
-      const applied = await entryProcessor.process(
-        documentId,
-        entry.id,
-        entry.payload,
-      );
+      const applied = await entryProcessor.process(documentId, entry.id, entry.payload);
       if (!applied) {
         console.error(`[replay-document-timelines] doc=${documentId} aborting replay at entry=${entry.id}`);
         return;

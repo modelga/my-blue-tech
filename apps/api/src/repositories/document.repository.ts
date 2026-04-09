@@ -42,12 +42,7 @@ export class DocumentRepository {
     return rows[0] ?? null;
   }
 
-  async create(
-    id: string,
-    owner: string,
-    name: string,
-    definition: Record<string, unknown>,
-  ): Promise<Document> {
+  async create(id: string, owner: string, name: string, definition: Record<string, unknown>): Promise<Document> {
     const { rows } = await this.pool.query<Document>(
       "INSERT INTO documents (id, owner, name, definition) VALUES ($1, $2, $3, $4) RETURNING id, owner, name, definition, state, initialized, created_at, updated_at",
       [id, owner, name, definition],
@@ -55,11 +50,7 @@ export class DocumentRepository {
     return rows[0];
   }
 
-  async updateState(
-    id: string,
-    state: Record<string, unknown>,
-    initialized: boolean,
-  ): Promise<Document | null> {
+  async updateState(id: string, state: Record<string, unknown>, initialized: boolean): Promise<Document | null> {
     const { rows } = await this.pool.query<Document>(
       "UPDATE documents SET state = $1, initialized = $2, updated_at = NOW() WHERE id = $3 RETURNING id, owner, name, definition, state, initialized, created_at, updated_at",
       [state, initialized, id],
@@ -68,10 +59,7 @@ export class DocumentRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const { rowCount } = await this.pool.query(
-      "DELETE FROM documents WHERE id = $1",
-      [id],
-    );
+    const { rowCount } = await this.pool.query("DELETE FROM documents WHERE id = $1", [id]);
     return (rowCount ?? 0) > 0;
   }
 
@@ -85,11 +73,7 @@ export class DocumentRepository {
     return rows;
   }
 
-  async appendHistory(
-    documentId: string,
-    event: Record<string, unknown>,
-    diff: Record<string, unknown>[] | null,
-  ): Promise<DocumentHistoryEntry> {
+  async appendHistory(documentId: string, event: Record<string, unknown>, diff: Record<string, unknown>[] | null): Promise<DocumentHistoryEntry> {
     const { rows } = await this.pool.query<DocumentHistoryEntry>(
       `INSERT INTO document_history (document_id, seq, event, diff)
        VALUES ($1, (SELECT COALESCE(MAX(seq), 0) + 1 FROM document_history WHERE document_id = $1), $2, $3::jsonb[])

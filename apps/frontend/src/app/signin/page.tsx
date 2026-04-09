@@ -1,22 +1,8 @@
 import { RedirectType, redirect } from "next/navigation";
 import { auth, signIn } from "@/auth";
-import {
-  authCard,
-  authDividerText,
-  authInput,
-  authLink,
-  authPrimaryButton,
-  authSubtitle,
-  authTitle,
-  authWrapper,
-  errorBanner,
-} from "@/lib/styles";
+import { authCard, authDividerText, authInput, authLink, authPrimaryButton, authSubtitle, authTitle, authWrapper, errorBanner } from "@/lib/styles";
 
-export default async function SignInPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
-}) {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; error?: string }> }) {
   const session = await auth();
   if (session) redirect("/");
 
@@ -28,13 +14,7 @@ export default async function SignInPage({
         <h1 style={authTitle}>Sign in</h1>
         <p style={authSubtitle}>Blue Technologies Dashboard</p>
 
-        {error && (
-          <p style={errorBanner}>
-            {error === "CredentialsSignin"
-              ? "Invalid username or password."
-              : `Error: ${error}`}
-          </p>
-        )}
+        {error && <p style={errorBanner}>{error === "CredentialsSignin" ? "Invalid username or password." : `Error: ${error}`}</p>}
 
         <form
           action={async (formData: FormData) => {
@@ -50,20 +30,8 @@ export default async function SignInPage({
             }
           }}
         >
-          <input
-            name="username"
-            type="text"
-            placeholder="Username"
-            required
-            style={authInput}
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            required
-            style={authInput}
-          />
+          <input name="username" type="text" placeholder="Username" required style={authInput} />
+          <input name="password" type="password" placeholder="Password" required style={authInput} />
           <button type="submit" style={authPrimaryButton}>
             Sign in
           </button>

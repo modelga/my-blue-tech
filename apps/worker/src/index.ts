@@ -7,7 +7,7 @@ import { startTimelineWorker } from "./workers/timeline.worker";
 
 const DATABASE_URL = process.env.DATABASE_URL!;
 
-const pool = new Pool({ connectionString: DATABASE_URL, min:2, max: 4});
+const pool = new Pool({ connectionString: DATABASE_URL, min: 2, max: 4 });
 
 const boss = new PgBoss({ connectionString: DATABASE_URL, max: 4 });
 boss.on("error", (err) => console.error("[pg-boss]", err));

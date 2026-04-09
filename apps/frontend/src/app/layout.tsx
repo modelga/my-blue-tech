@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { auth, signOut } from "@/auth";
 import { colors, radius } from "@/lib/styles";
-import type { CSSProperties } from "react";
 
 export const metadata: Metadata = {
   title: "Blue Technologies",
   description: "MyOS-like Document Session Dashboard",
 };
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
   return (
@@ -25,9 +21,7 @@ export default async function RootLayout({
           <nav style={styles.nav}>
             {session ? (
               <>
-                <span style={styles.userLabel}>
-                  {session.user?.name ?? session.user?.email}
-                </span>
+                <span style={styles.userLabel}>{session.user?.name ?? session.user?.email}</span>
                 <form
                   action={async () => {
                     "use server";

@@ -42,7 +42,10 @@ export class DocumentRepository {
     return rows[0] ?? null;
   }
 
-  async findByIdForUpdate(id: string, client: PoolClient): Promise<{ definition: Record<string, unknown>; state: Record<string, unknown> | null; initialized: boolean } | null> {
+  async findByIdForUpdate(
+    id: string,
+    client: PoolClient,
+  ): Promise<{ definition: Record<string, unknown>; state: Record<string, unknown> | null; initialized: boolean } | null> {
     const { rows } = await client.query("SELECT definition, state, initialized FROM documents WHERE id = $1 FOR UPDATE", [id]);
     return rows[0] ?? null;
   }
@@ -52,7 +55,12 @@ export class DocumentRepository {
     await db.query("UPDATE documents SET state = $1, initialized = $2, updated_at = NOW() WHERE id = $3", [state, initialized, id]);
   }
 
-  async appendHistory(documentId: string, event: Record<string, unknown>, diff: Record<string, unknown>[] | null, client?: PoolClient): Promise<DocumentHistoryEntry> {
+  async appendHistory(
+    documentId: string,
+    event: Record<string, unknown>,
+    diff: Record<string, unknown>[] | null,
+    client?: PoolClient,
+  ): Promise<DocumentHistoryEntry> {
     const db = client ?? this.pool;
     const { rows } = await db.query<DocumentHistoryEntry>(
       `INSERT INTO document_history (document_id, seq, event, diff)

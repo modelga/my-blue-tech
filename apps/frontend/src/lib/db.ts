@@ -26,11 +26,7 @@ const getDefaultDb = () => {
 };
 
 export const stmtFindByUserName = (db: Database = getDefaultDb()) =>
-  db.prepare<{ id: number; username: string; password_hash: string }, [string]>(
-    "SELECT id, username, password_hash FROM users WHERE username = ?",
-  );
+  db.prepare<{ id: number; username: string; password_hash: string }, [string]>("SELECT id, username, password_hash FROM users WHERE username = ?");
 
 export const stmtInsertUser = (db: Database = getDefaultDb()) =>
-  db.prepare<void, [string, string]>(
-    "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-  );
+  db.prepare<void, [string, string]>("INSERT INTO users (username, password_hash) VALUES (?, ?)");
