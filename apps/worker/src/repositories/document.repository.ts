@@ -27,6 +27,16 @@ export class DocumentRepository {
     return rows;
   }
 
+  async findTimelineIdsByDocumentId(documentId: string): Promise<string[]> {
+    const { rows } = await this.pool.query<{ timeline_id: string }>(
+      `SELECT DISTINCT val->>'timelineId' AS timeline_id
+       FROM jsonb_each((SELECT definition->'contracts' FROM documents WHERE id = $1)) AS c(key, val)
+       WHERE val->>'timelineId' IS NOT NULL`,
+      [documentId],
+    );
+    return rows.map((r) => r.timeline_id);
+  }
+
   async findById(id: string): Promise<{ definition: Record<string, unknown>; state: Record<string, unknown> | null; initialized: boolean } | null> {
     const { rows } = await this.pool.query("SELECT definition, state, initialized FROM documents WHERE id = $1", [id]);
     return rows[0] ?? null;

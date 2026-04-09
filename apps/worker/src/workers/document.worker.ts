@@ -45,6 +45,10 @@ export async function startDocumentWorker(boss: PgBoss, pool: Pool) {
     // Notify the API's SSE fan-out via pg_notify so connected clients update immediately.
     await notifyDocumentUpdated(pool, documentId, entry.seq, "initialized");
 
+    // Schedule replay of all existing timeline entries for this document.
+    // singletonKey prevents duplicate replays if the job is retried.
+    const jobId = await boss.send("replay-document-timelines", { documentId }, { singletonKey: documentId });
+    console.log(`[initialize-document] scheduled replay-document-timelines job=${jobId} for documentId=${documentId}`);
     console.log(`[initialize-document] done documentId=${documentId} seq=${entry.seq}`);
   });
 }

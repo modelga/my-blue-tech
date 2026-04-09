@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import { PgBoss } from "pg-boss";
 import { startDocumentWorker } from "./workers/document.worker";
+import { startDocumentReplayWorker } from "./workers/document-replay.worker";
 import { startDocumentSessionWorker } from "./workers/document-session.worker";
 import { startTimelineWorker } from "./workers/timeline.worker";
 
@@ -13,6 +14,7 @@ boss.on("error", (err) => console.error("[pg-boss]", err));
 await boss.start();
 
 await startDocumentWorker(boss, pool);
+await startDocumentReplayWorker(boss, pool);
 await startTimelineWorker(boss, pool);
 await startDocumentSessionWorker(boss, pool);
 

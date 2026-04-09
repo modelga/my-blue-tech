@@ -67,7 +67,7 @@ services:
       postgres:
         condition: service_healthy
     deploy:
-      replicas: 1 # increase for horizontal scale; pg-boss SKIP LOCKED handles concurrency
+      replicas: 10 # increase for horizontal scale; pg-boss SKIP LOCKED handles concurrency
     networks:
       - blue
     develop:
