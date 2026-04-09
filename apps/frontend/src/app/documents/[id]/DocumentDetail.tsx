@@ -1,7 +1,9 @@
 "use client";
 
 import { dump } from "js-yaml";
-import { useState } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
+import { useEffect, useRef, useState } from "react";
+import { getDocument, getDocumentHistory } from "@/lib/api";
 import type { DocumentDetail as DocumentDetailType, DocumentHistoryEntry } from "@/lib/api";
 import {
   colors,
@@ -106,8 +108,45 @@ function DiffLog({ changes }: { changes: IChange[] }) {
   );
 }
 
-export function DocumentDetail({ document, history }: { document: DocumentDetailType; history: DocumentHistoryEntry[] }) {
-  const [selectedIdx, setSelectedIdx] = useState<number>(history.length - 1);
+export function DocumentDetail({ document: initialDocument, history: initialHistory }: { document: DocumentDetailType; history: DocumentHistoryEntry[] }) {
+  const [document, setDocument] = useState(initialDocument);
+  const [history, setHistory] = useState(initialHistory);
+  const [selectedIdx, setSelectedIdx] = useState<number>(initialHistory.length - 1);
+
+  // Track selectedIdx in a ref so the SSE callback can read the current value
+  // without being recreated on every render.
+  const selectedIdxRef = useRef(selectedIdx);
+  selectedIdxRef.current = selectedIdx;
+
+  // Increment on every SSE message; debounce so rapid-fire events (e.g. bulk
+  // replay) coalesce into a single fetch after 500 ms of silence.
+  const [sseSignal, setSseSignal] = useState(0);
+  const debouncedSseSignal = useDebounce(sseSignal, 500);
+
+  useEffect(() => {
+    const es = new EventSource(`/api/documents/${initialDocument.id}/stream`);
+    es.onmessage = () => setSseSignal((n) => n + 1);
+    return () => es.close();
+  }, [initialDocument.id]);
+
+  useEffect(() => {
+    if (debouncedSseSignal === 0) return;
+    (async () => {
+      const [freshDoc, freshHistory] = await Promise.all([
+        getDocument(initialDocument.id),
+        getDocumentHistory(initialDocument.id),
+      ]);
+      setDocument(freshDoc);
+      setHistory((prev) => {
+        // Auto-advance to the new latest entry only if the user was already there.
+        const wasAtLatest = selectedIdxRef.current < 0 || selectedIdxRef.current === prev.length - 1;
+        if (wasAtLatest) {
+          setSelectedIdx(freshHistory.length - 1);
+        }
+        return freshHistory;
+      });
+    })();
+  }, [debouncedSseSignal]);
 
   // snapshots[0] = definition, snapshots[i+1] = state after history[i]
   const snapshots = buildSnapshots(document.definition, history);
