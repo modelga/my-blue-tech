@@ -12,6 +12,21 @@ export interface DocumentHistoryEntry {
 export class DocumentRepository {
   constructor(private readonly pool: Pool) {}
 
+  async findByTimelineId(timelineId: string): Promise<{ id: string; definition: Record<string, unknown>; state: Record<string, unknown> | null }[]> {
+    const { rows } = await this.pool.query(
+      `SELECT id, definition, state
+       FROM documents
+       WHERE initialized = true
+         AND EXISTS (
+           SELECT 1 FROM jsonb_each(definition->'contracts') AS c(key, val)
+           WHERE val->>'timelineId' = $1
+         )
+       ORDER BY created_at`,
+      [timelineId],
+    );
+    return rows;
+  }
+
   async findById(id: string): Promise<{ definition: Record<string, unknown>; state: Record<string, unknown> | null; initialized: boolean } | null> {
     const { rows } = await this.pool.query("SELECT definition, state, initialized FROM documents WHERE id = $1", [id]);
     return rows[0] ?? null;

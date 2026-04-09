@@ -29,7 +29,9 @@ export async function startDocumentWorker(boss: PgBoss, pool: Pool) {
     if (result.capabilityFailure) {
       throw new Error(`[initialize-document] capability failure for ${documentId}: ${result.failureReason}`);
     }
-
+    if (result.triggeredEvents.length > 0) {
+      // boss.publish("process-entry", {});
+    }
     const definitionJson = blue.nodeToJson(definitionNode) as Record<string, unknown>;
     const initializedJson = blue.nodeToJson(result.document) as Record<string, unknown>;
 
@@ -38,11 +40,11 @@ export async function startDocumentWorker(boss: PgBoss, pool: Pool) {
     console.log(changeset);
     const entry = await documentRepo.appendHistory(documentId, { type: "initialize", documentId }, changeset as Record<string, unknown>);
 
-    // await documentRepo.updateState(documentId, initializedJson, true);
+    await documentRepo.updateState(documentId, initializedJson, true);
 
-    // // Notify the API's SSE fan-out via pg_notify so connected clients update immediately.
-    // await notifyDocumentUpdated(pool, documentId, entry.seq, "initialized");
+    // Notify the API's SSE fan-out via pg_notify so connected clients update immediately.
+    await notifyDocumentUpdated(pool, documentId, entry.seq, "initialized");
 
-    // console.log(`[initialize-document] done documentId=${documentId} seq=${entry.seq}`);
+    console.log(`[initialize-document] done documentId=${documentId} seq=${entry.seq}`);
   });
 }
