@@ -14,7 +14,9 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
   return (
     <div>
       <div style={formPageHeader}>
-        <a href="/documents" style={formBack}>← Documents</a>
+        <a href="/documents" style={formBack}>
+          ← Documents
+        </a>
         <h2 style={pageTitle}>{document.name}</h2>
       </div>
       <DocumentDetail document={document} history={history} />
