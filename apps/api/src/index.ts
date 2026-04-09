@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { openAPIRouteHandler } from "hono-openapi";
 import { Client, Pool } from "pg";
 import { PgBoss } from "pg-boss";
 import { authMiddleware } from "./lib/auth";
@@ -55,6 +56,35 @@ app.get("/health", (c) => c.json({ status: "ok" }));
 app.use("/api/*", authMiddleware);
 app.route("/api/timelines", timelinesRouter(boss, timelineRepo));
 app.route("/api/documents", documentsRouter(boss, sseClients, documentRepo, timelineRepo));
+
+app.get(
+  "/openapi",
+  openAPIRouteHandler(app, {
+    documentation: {
+      info: {
+        title: "Blue Technologies API",
+        version: "1.0.0",
+        description: "REST API for managing Blue Language documents and timelines. All `/api/*` endpoints require `Authorization: Bearer user <username>`.",
+      },
+      servers: [{ url: "http://localhost:3001", description: "Local" }],
+      components: {
+        securitySchemes: {
+          BearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "user <username>",
+          },
+        },
+      },
+      security: [{ BearerAuth: [] }],
+      tags: [
+        { name: "Timelines", description: "Named event channels" },
+        { name: "Timeline Entries", description: "Append-only events pushed to a timeline" },
+        { name: "Documents", description: "Blue Language documents driven by timeline entries" },
+      ],
+    },
+  }),
+);
 
 export default {
   port: PORT,
