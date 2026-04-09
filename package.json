@@ -3,6 +3,10 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "test:integration": "docker compose -f  docker-compose.integration-test.yml  run --build --rm integration-tests",
+    "test:e2e": "docker compose up -d && cd tests && bun run test"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

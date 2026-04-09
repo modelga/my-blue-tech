@@ -1,0 +1,17 @@
+name: blue
+include:
+  - docker-compose.yml
+services:
+  integration-tests:
+    build:
+      context: ./apps/integration-tests
+    environment:
+      API_URL: http://api:3001
+      TEST_USER: integration-test
+    depends_on:
+      api:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    networks:
+      - blue
