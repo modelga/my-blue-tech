@@ -12,6 +12,7 @@
     "@blue-labs/language": "^3.9.2",
     "@blue-repository/types": "^0.25.0",
     "@hono/standard-validator": "^0.2.2",
+    "@hono/swagger-ui": "^0.6.1",
     "@hono/zod-openapi": "^1.2.4",
     "@standard-community/standard-json": "^0.3.5",
     "@standard-community/standard-openapi": "^0.2.9",

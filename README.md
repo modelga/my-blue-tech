@@ -38,8 +38,12 @@ docker compose up --build
 |-----------------------------|------------------------------|
 | http://localhost:3000       | Frontend dashboard           |
 | http://localhost:3001/health| API health check             |
+| http://localhost:3001/swagger-ui | Swagger UI — interactive API explorer |
+| http://localhost:3001/openapi | OpenAPI JSON spec           |
 | http://localhost:3010       | pg-boss job queue inspector  |
 | http://localhost:8080       | Adminer — PostgreSQL web UI  |
+
+The API exposes an OpenAPI 3.0 spec at `/openapi` and an interactive Swagger UI at `/swagger-ui`. All `/api/*` endpoints require `Authorization: Bearer user <username>` — the Swagger UI includes an **Authorize** button to set this header for in-browser requests.
 
 On first start PostgreSQL runs `infra/postgres/01-grants.sql` which grants the `blue` user the `CREATE` privilege required by pg-boss to manage its schema.
 

@@ -1,3 +1,4 @@
+import { swaggerUI } from "@hono/swagger-ui";
 import { Hono } from "hono";
 import { openAPIRouteHandler } from "hono-openapi";
 import { Client, Pool } from "pg";
@@ -85,6 +86,7 @@ app.get(
     },
   }),
 );
+app.get("/swagger-ui", swaggerUI({ url: "/openapi" }));
 
 export default {
   port: PORT,
