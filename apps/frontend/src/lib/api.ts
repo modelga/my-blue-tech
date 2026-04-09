@@ -58,9 +58,36 @@ export interface Document {
   changes_count: number;
 }
 
+export interface DocumentDetail extends Document {
+  definition: Record<string, unknown>;
+  state: Record<string, unknown> | null;
+  initialized: boolean;
+  updated_at: string;
+}
+
+export interface DocumentHistoryEntry {
+  id: number;
+  document_id: string;
+  seq: number;
+  event: Record<string, unknown>;
+  diff: Record<string, unknown>[] | null;
+  created_at: string;
+}
+
 export async function getDocuments(): Promise<Document[]> {
   const data = await apiRequest<{ documents: Document[] }>("/api/documents");
   return data.documents;
+}
+
+export async function getDocument(id: string): Promise<DocumentDetail> {
+  return apiRequest<DocumentDetail>(`/api/documents/${id}`);
+}
+
+export async function getDocumentHistory(id: string): Promise<DocumentHistoryEntry[]> {
+  const data = await apiRequest<{ documentId: string; history: DocumentHistoryEntry[] }>(
+    `/api/documents/${id}/history`,
+  );
+  return data.history;
 }
 
 // ── Timeline Entries ──────────────────────────────────────────────────────────

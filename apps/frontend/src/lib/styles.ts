@@ -491,3 +491,139 @@ export const entryPayload: CSSProperties = {
   wordBreak: "break-all",
   color: colors.textBody,
 };
+
+// ── Document detail ───────────────────────────────────────────────────────────
+
+/** Two-column grid: narrow history sidebar + wide detail pane. */
+export const docDetailLayout: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "240px 1fr",
+  gap: "1.5rem",
+  alignItems: "start",
+};
+
+/** White card wrapping the history entry list. */
+export const historyPanel: CSSProperties = {
+  background: colors.white,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.lg,
+  overflow: "hidden",
+};
+
+/** Small caps title row at the top of the history panel. */
+export const historyPanelTitle: CSSProperties = {
+  margin: 0,
+  padding: "0.75rem 1rem",
+  fontSize: "0.72rem",
+  fontWeight: 700,
+  color: colors.textMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.07em",
+  background: colors.pageBg,
+  borderBottom: `1px solid ${colors.border}`,
+};
+
+/** Clickable history entry button (inactive). */
+export const historyItemBase: CSSProperties = {
+  display: "block",
+  width: "100%",
+  textAlign: "left",
+  padding: "0.7rem 1rem",
+  background: "none",
+  border: "none",
+  borderBottom: `1px solid ${colors.border}`,
+  cursor: "pointer",
+  color: colors.textBody,
+  fontSize: "0.85rem",
+  lineHeight: 1.4,
+};
+
+/** Clickable history entry button (active / selected). */
+export const historyItemActive: CSSProperties = {
+  display: "block",
+  width: "100%",
+  textAlign: "left",
+  padding: "0.7rem 1rem 0.7rem calc(1rem - 3px)",
+  background: "#eff6ff",
+  border: "none",
+  borderBottom: `1px solid ${colors.border}`,
+  borderLeft: `3px solid ${colors.blue}`,
+  cursor: "pointer",
+  color: colors.blue,
+  fontSize: "0.85rem",
+  fontWeight: 600,
+  lineHeight: 1.4,
+};
+
+/** White card section inside the detail pane (state / event / changes). */
+export const detailSection: CSSProperties = {
+  background: colors.white,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.lg,
+  padding: "1.25rem 1.5rem",
+};
+
+/** Small caps label above a detail section's content. */
+export const detailSectionTitle: CSSProperties = {
+  margin: "0 0 0.75rem",
+  fontSize: "0.72rem",
+  fontWeight: 700,
+  color: colors.textMuted,
+  textTransform: "uppercase",
+  letterSpacing: "0.07em",
+};
+
+/** Scrollable monospace block for showing JSON state / events. */
+export const stateViewer: CSSProperties = {
+  margin: 0,
+  background: colors.pageBg,
+  border: `1px solid ${colors.border}`,
+  borderRadius: radius.md,
+  padding: "0.875rem 1rem",
+  fontSize: "0.8rem",
+  fontFamily: "ui-monospace, SFMono-Regular, monospace",
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-all",
+  color: colors.textBody,
+  maxHeight: "300px",
+  overflowY: "auto",
+};
+
+/** One diff operation row — ADD variant (green). */
+export const diffRowAdd: CSSProperties = {
+  display: "flex",
+  gap: "0.5rem",
+  padding: "0.25rem 0.5rem",
+  borderRadius: radius.sm,
+  fontSize: "0.8rem",
+  fontFamily: "ui-monospace, SFMono-Regular, monospace",
+  background: "#f0fdf4",
+  color: "#16a34a",
+  marginBottom: "0.25rem",
+};
+
+/** One diff operation row — REMOVE variant (red). */
+export const diffRowRemove: CSSProperties = {
+  display: "flex",
+  gap: "0.5rem",
+  padding: "0.25rem 0.5rem",
+  borderRadius: radius.sm,
+  fontSize: "0.8rem",
+  fontFamily: "ui-monospace, SFMono-Regular, monospace",
+  background: colors.errorBg,
+  color: colors.errorText,
+  marginBottom: "0.25rem",
+};
+
+/** One diff operation row — UPDATE variant (amber). */
+export const diffRowUpdate: CSSProperties = {
+  display: "flex",
+  gap: "0.5rem",
+  padding: "0.25rem 0.5rem",
+  borderRadius: radius.sm,
+  fontSize: "0.8rem",
+  fontFamily: "ui-monospace, SFMono-Regular, monospace",
+  background: "#fffbeb",
+  color: "#b45309",
+  marginBottom: "0.25rem",
+};
